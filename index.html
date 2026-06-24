@@ -11,75 +11,94 @@
     --blue:#1f5f9e;   /* the mechanism / solicitation */
     --amber:#b5781b;  /* money / award */
     --green:#2e7d4f;  /* awarded / closed */
-    --rose:#9e3b2f;   /* caution / pending */
+    --rose:#9e3b2f;   /* caution / pending / closed */
     --maxw:1120px;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
-  body{
-    background:var(--paper); color:var(--ink);
-    font:16px/1.55 Georgia,"Times New Roman",serif;
-    -webkit-font-smoothing:antialiased;
-  }
+  body{background:var(--paper);color:var(--ink);font:16px/1.55 Georgia,"Times New Roman",serif;-webkit-font-smoothing:antialiased}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
-  .uplabel{font:600 11px/1.2 ui-sans-serif,system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
   a{color:var(--blue)}
 
-  /* ---- masthead ---- */
+  /* masthead */
   header.masthead{border-bottom:3px double var(--ink);background:linear-gradient(#fbf8f1,#f6f2ea)}
   .masthead .wrap{padding:26px 22px 18px}
   .kicker{text-align:center;font:600 11px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
   h1.title{font:800 clamp(34px,6vw,62px)/.95 "Times New Roman",Georgia,serif;letter-spacing:-.01em;text-align:center;margin:.18em 0 .1em}
   .subtitle{text-align:center;font-style:italic;color:var(--muted);margin:0 0 14px;font-size:clamp(15px,2.3vw,19px)}
-  .deck{max-width:760px;margin:0 auto;text-align:center;color:#4a4338}
+  .deck{max-width:780px;margin:0 auto;text-align:center;color:#4a4338}
   .deck b{color:var(--ink)}
   .stagepill{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0 2px;font:600 12px/1 ui-sans-serif,system-ui,sans-serif}
   .stagepill span{padding:5px 10px;border-radius:999px;border:1px solid var(--rule);background:var(--card)}
   .stagepill .arrow{border:none;background:none;color:var(--muted);padding:0}
   .dot{width:9px;height:9px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:5px}
 
-  /* ---- controls ---- */
-  section.tool{padding:26px 0 10px}
+  /* controls */
+  section.tool{padding:24px 0 10px}
   .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
-  .field{display:flex;flex-direction:column;gap:5px;flex:1 1 220px}
+  .field{display:flex;flex-direction:column;gap:5px;flex:1 1 150px}
+  .field.kw{flex:2 1 220px}
   .field label{font:600 11px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
   select,input[type=text]{font:15px/1.3 Georgia,serif;padding:10px 11px;border:1px solid var(--rule);border-radius:9px;background:#fff;color:var(--ink);width:100%}
   button{font:600 14px/1 ui-sans-serif,system-ui,sans-serif;padding:11px 18px;border-radius:9px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer}
-  button.ghost{background:transparent;color:var(--ink)}
   button:active{transform:translateY(1px)}
+  button.mini{font:600 11px/1 ui-sans-serif,system-ui,sans-serif;padding:6px 10px;background:#fff;color:var(--ink);border:1px solid var(--rule);border-radius:7px}
 
-  /* ---- layout ---- */
-  .grid{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:22px;margin-top:22px;align-items:start}
+  /* layout */
+  .grid{display:grid;grid-template-columns:minmax(290px,380px) 1fr;gap:22px;margin-top:22px;align-items:start}
   @media(max-width:820px){.grid{grid-template-columns:1fr}}
   .panel{background:var(--card);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--shadow)}
-  .panel h2{font:700 13px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0;padding:14px 16px;border-bottom:1px solid var(--rule)}
+  .panel h2{font:700 13px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0;padding:14px 16px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .panel h2 .count{font-weight:600;color:var(--blue);letter-spacing:0;text-transform:none}
 
   /* results list */
-  .list{max-height:620px;overflow:auto}
+  .list{max-height:660px;overflow:auto}
   .row{padding:13px 16px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background .12s}
   .row:hover{background:#f4eee2}
   .row.sel{background:#eef3fb;box-shadow:inset 3px 0 var(--blue)}
-  .row .rtitle{font-weight:700;font-size:15px;margin:0 0 3px}
-  .row .rmeta{font:12px/1.4 ui-sans-serif,system-ui,sans-serif;color:var(--muted)}
+  .row .rtitle{font-weight:700;font-size:15px;margin:0 0 4px}
+  .row .rmeta{font:12px/1.45 ui-sans-serif,system-ui,sans-serif;color:var(--muted)}
   .row .ragency{color:var(--blue)}
-  .pin{font:12px/1 ui-monospace,Menlo,monospace;background:#efe8d8;border:1px solid var(--rule);border-radius:5px;padding:2px 6px;color:#5a5142}
+  .pin{font:11px/1 ui-monospace,Menlo,monospace;background:#efe8d8;border:1px solid var(--rule);border-radius:5px;padding:2px 6px;color:#5a5142}
+  .tag{display:inline-block;font:700 11px/1 ui-sans-serif,system-ui,sans-serif;padding:3px 7px;border-radius:999px;margin-right:6px}
+  .tag.open{background:#e9f2ea;color:var(--green)}
+  .tag.soon{background:#fbf0dc;color:var(--amber)}
+  .tag.closed{background:#f6e7e4;color:var(--rose)}
+  .tag.amt{background:#fbf0dc;color:#8a5c12}
 
-  /* detail / graph */
-  .detail{padding:18px 18px 22px;min-height:300px}
+  /* detail */
+  .detail{padding:18px 18px 22px;min-height:320px}
   .empty{color:var(--muted);font-style:italic;padding:40px 18px;text-align:center}
-  .agencybar{display:flex;gap:18px;flex-wrap:wrap;align-items:baseline;padding:14px 16px;border:1px solid var(--rule);border-radius:12px;background:#fbf6ea;margin-bottom:18px}
+  .agencybar{display:flex;gap:22px;flex-wrap:wrap;align-items:baseline;padding:14px 16px;border:1px solid var(--rule);border-radius:12px;background:#fbf6ea;margin-bottom:16px}
   .agencybar .big{font:800 26px/1 "Times New Roman",serif;color:var(--amber)}
-  .agencybar .lbl{font:600 11px/1.3 ui-sans-serif,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .agencybar .lbl{font:600 11px/1.3 ui-sans-serif,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 
+  /* apply panel */
+  .apply{border:1px solid var(--blue);border-radius:12px;background:#fff;margin-bottom:16px;overflow:hidden}
+  .apply h3{font:700 12px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--blue);margin:0;padding:10px 14px}
+  .apply .body{padding:14px}
+  .apply .due{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .apply .due .d{font:800 18px/1 "Times New Roman",serif}
+  .apply dl{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;margin:0;font-size:14px;align-items:baseline}
+  .apply dt{font:600 11px/1.4 ui-sans-serif,system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .apply dd{margin:0}
+  .apply .passport{margin-top:14px;display:inline-block;font:600 13px/1 ui-sans-serif,system-ui,sans-serif;background:var(--ink);color:#fff;padding:10px 15px;border-radius:8px;text-decoration:none}
+  .apply .pnote{font:12px/1.5 ui-sans-serif,system-ui,sans-serif;color:var(--muted);margin-top:10px}
+
+  .scope{font-size:14.5px;line-height:1.6;color:#3f3930;background:#faf6ee;border:1px solid var(--rule);border-radius:10px;padding:13px 15px;margin-top:16px}
+  .scope .lbl{font:600 11px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+
+  /* chain */
+  .chain-h{font:600 11px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
   .chain{display:flex;gap:0;flex-wrap:wrap;align-items:stretch}
-  .stage{flex:1 1 220px;min-width:210px;display:flex;align-items:stretch}
+  .stage{flex:1 1 220px;min-width:200px;display:flex;align-items:stretch}
   .box{flex:1;border:1px solid var(--rule);border-top:4px solid var(--blue);border-radius:11px;background:#fff;padding:13px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
   .box.award{border-top-color:var(--green)}
   .box.intent{border-top-color:var(--amber)}
   .box .stage-name{font:700 11px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
   .box .when{font:12px/1 ui-sans-serif,system-ui,sans-serif;color:var(--muted)}
   .box .bt{font-weight:700;font-size:14px;line-height:1.3}
-  .box .amt{font:800 19px/1 "Times New Roman",serif;color:var(--amber)}
+  .box .amt{font:800 19px/1 "Times New Roman",serif;color:var(--green)}
   .box .vend{font-size:13px;color:#4a4338}
   .box a.view{margin-top:auto;font:600 12px/1 ui-sans-serif,system-ui,sans-serif;text-decoration:none}
   .connector{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:24px;flex:0 0 30px}
@@ -92,8 +111,8 @@
 
   footer{border-top:3px double var(--ink);margin-top:46px;padding:26px 0 60px;font:13px/1.6 ui-sans-serif,system-ui,sans-serif;color:var(--muted)}
   footer h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 8px;color:var(--ink)}
-  footer a{color:var(--blue)}
   .caveat{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;margin-top:14px}
+  code{font:12px/1 ui-monospace,Menlo,monospace;background:#efe8d8;padding:1px 5px;border-radius:4px}
 </style>
 </head>
 <body>
@@ -102,9 +121,10 @@
     <div class="kicker">Built on The City Record · Official Journal of the City of New York</div>
     <h1 class="title">City Record Money Map</h1>
     <p class="subtitle">Every NYC contract is born as a notice. This follows one from RFP to dollars.</p>
-    <p class="deck">A consultant reading a <b>Request for Proposals</b> sees one isolated notice — not how much that
-      agency actually moves, who won last time, or whether an award ever landed. This stitches the scattered
-      notices for a single procurement (linked by their <b>PIN</b>) back into one chain.</p>
+    <p class="deck">A consultant reading a <b>Request for Proposals</b> sees one isolated notice — not how to respond,
+      how much the agency actually moves, who won last time, or whether an award ever landed. This reads
+      <b>The City Record</b> live and stitches the scattered notices for a single procurement (linked by their <b>PIN</b>)
+      back into one chain.</p>
     <div class="stagepill">
       <span><i class="dot" style="background:var(--blue)"></i>Solicitation (RFP)</span>
       <span class="arrow">→</span>
@@ -119,27 +139,50 @@
   <div class="wrap">
     <div class="controls">
       <div class="field">
+        <label for="mode">Show</label>
+        <select id="mode">
+          <option value="open">Open RFPs (accepting now)</option>
+          <option value="allrfp">All RFPs</option>
+          <option value="award">Recent Awards ($)</option>
+        </select>
+      </div>
+      <div class="field">
         <label for="agency">Agency</label>
         <select id="agency"><option value="">All agencies — loading…</option></select>
       </div>
-      <div class="field" style="flex:1 1 260px">
-        <label for="kw">Keyword (title / vendor / service)</label>
-        <input type="text" id="kw" placeholder="e.g. shelter, IT, construction, security">
+      <div class="field kw">
+        <label for="kw">Keyword</label>
+        <input type="text" id="kw" placeholder="shelter, IT, construction, security…">
       </div>
-      <div class="field" style="flex:0 0 auto">
-        <label>&nbsp;</label>
-        <button id="go">Find RFPs</button>
+      <div class="field">
+        <label for="sort">Sort by</label>
+        <select id="sort">
+          <option value="deadline">Deadline: soonest</option>
+          <option value="newest">Newest posted</option>
+          <option value="amount">Largest $</option>
+        </select>
       </div>
+      <div class="field" id="minwrap">
+        <label for="minamt">Min award $</label>
+        <select id="minamt">
+          <option value="">Any</option>
+          <option value="100000">$100K+</option>
+          <option value="1000000">$1M+</option>
+          <option value="10000000">$10M+</option>
+          <option value="100000000">$100M+</option>
+        </select>
+      </div>
+      <div class="field" style="flex:0 0 auto"><label>&nbsp;</label><button id="go">Search</button></div>
     </div>
 
     <div class="grid">
       <div class="panel">
-        <h2 id="reshead">Recent RFPs</h2>
-        <div class="list" id="list"><div class="empty"><span class="loading"></span> loading recent solicitations…</div></div>
+        <h2><span><span id="reshead">Open RFPs</span> <span class="count" id="rescount"></span></span><button id="export" class="mini">⬇ Export CSV</button></h2>
+        <div class="list" id="list"><div class="empty"><span class="loading"></span> loading…</div></div>
       </div>
       <div class="panel">
         <h2>Money trail</h2>
-        <div class="detail" id="detail"><div class="empty">Pick an RFP on the left to trace it from notice → award → dollars.</div></div>
+        <div class="detail" id="detail"><div class="empty">Pick a notice on the left to trace it — for an RFP you'll see <b>how to respond</b> (deadline, contact, where to submit) and the full notice → award → dollars chain.</div></div>
       </div>
     </div>
   </div>
@@ -149,19 +192,25 @@
   <div class="wrap">
     <h3>What this is</h3>
     <p>The City Record is NYC's official daily journal: every agency must publish its procurement solicitations,
-      award notices, public hearings, and property dispositions here (City Charter §1066). This tool reads that
-      same data live from NYC Open Data — dataset <a href="https://data.cityofnewyork.us/City-Government/City-Record-Online/dg92-zbpx" target="_blank" rel="noopener">City Record Online (dg92-zbpx)</a>,
+      award notices, public hearings, and property dispositions there (City Charter §1066). This tool reads that
+      same data <b>live</b> from NYC Open Data — dataset
+      <a href="https://data.cityofnewyork.us/City-Government/City-Record-Online/dg92-zbpx" target="_blank" rel="noopener">City Record Online (dg92-zbpx)</a>,
       the structured form of the printed paper — and re-links notices that share a Procurement Identification Number (PIN).</p>
+    <p><b>Why "how to respond" matters:</b> NYC runs bids through
+      <a href="https://www.nyc.gov/site/mocs/passport/about-passport.page" target="_blank" rel="noopener">PASSPort</a>
+      (the MOCS vendor portal). The City Record is the open legal record of every opportunity ≥ $100K — but it buries the
+      deadline and contact. This tool surfaces them.</p>
 
     <div class="caveat">
       <h3>Honest caveats (the data is messy)</h3>
-      <p style="margin:.3em 0">• <b>Junk PINs.</b> Some notices carry placeholder PINs (<code>NoPINFound</code>, <code>000000</code>, punctuation). Those can't be linked; the tool shows the notice alone and says so.</p>
-      <p style="margin:.3em 0">• <b>Blanket PINs.</b> A few PINs (e.g. emergency declarations) bundle many unrelated awards under one code. The chain then shows them all — that is the real data, not a bug.</p>
-      <p style="margin:.3em 0">• <b>Dollar outliers.</b> Raw <code>contract_amount</code> contains erroneous mega-values; agency totals exclude rows above $5B to keep the headline honest. Confirm any figure against the <a href="https://a856-cityrecord.nyc.gov/" target="_blank" rel="noopener">official City Record</a> and <a href="https://www.checkbooknyc.com/" target="_blank" rel="noopener">Checkbook NYC</a>.</p>
+      <p style="margin:.3em 0">• <b>RFPs rarely list a dollar value</b> — that's why "Min award $" applies to the <i>Awards</i> view; the money lives there.</p>
+      <p style="margin:.3em 0">• <b>Junk &amp; blanket PINs.</b> Some notices carry placeholder PINs that can't be linked; some PINs bundle many unrelated awards. The tool flags both.</p>
+      <p style="margin:.3em 0">• <b>Dollar outliers.</b> Raw <code>contract_amount</code> contains erroneous mega-values; agency totals exclude rows above $5B. Confirm any figure against the <a href="https://a856-cityrecord.nyc.gov/" target="_blank" rel="noopener">official City Record</a> and <a href="https://www.checkbooknyc.com/" target="_blank" rel="noopener">Checkbook NYC</a>.</p>
     </div>
 
     <p style="margin-top:16px">Sources: <a href="https://a856-cityrecord.nyc.gov/" target="_blank" rel="noopener">City Record Online (CROL)</a> ·
       <a href="https://data.cityofnewyork.us/City-Government/City-Record-Online/dg92-zbpx" target="_blank" rel="noopener">NYC Open Data dg92-zbpx</a> ·
+      <a href="https://a0333-passportpublic.nyc.gov/" target="_blank" rel="noopener">PASSPort Public</a> ·
       <a href="https://www.checkbooknyc.com/" target="_blank" rel="noopener">Checkbook NYC</a>.
       Data fetched live; figures as published by the City. <span id="stamp"></span></p>
   </div>
@@ -170,14 +219,16 @@
 <script>
 const SODA = "https://data.cityofnewyork.us/resource/dg92-zbpx.json";
 const REQ_URL = id => `https://a856-cityrecord.nyc.gov/RequestDetail/${encodeURIComponent(id)}`;
+const PASSPORT = "https://a0333-passportpublic.nyc.gov/";
 const STAGE_RANK = {"Solicitation":0,"Intent to Negotiate":1,"Vendor List":2,"Intent to Award":3,"Award":4};
 const JUNK_PINS = new Set(["NoPINFound","SEE BELOW","LINE 17 BELOW","TBD","N/A","NONE","VARIOUS","SEE ATTACHED"]);
+const SELECT = "request_id,start_date,agency_name,type_of_notice_description,category_description,short_title,pin,contract_amount,vendor_name,due_date,address_to_request,contact_name,contact_phone,email,selection_method_description,additional_description_1";
 
 const $ = s => document.querySelector(s);
+const todayISO = () => new Date().toISOString().slice(0,10) + "T00:00:00";
 
 async function soda(params){
-  const url = SODA + "?" + new URLSearchParams(params).toString();
-  const r = await fetch(url);
+  const r = await fetch(SODA + "?" + new URLSearchParams(params).toString());
   if(!r.ok) throw new Error("SODA " + r.status);
   return r.json();
 }
@@ -186,8 +237,8 @@ function usablePin(p){
   if(!p) return false;
   const s = String(p).trim();
   if(s.length < 4) return false;
-  if(!/[A-Za-z0-9]/.test(s)) return false;        // all punctuation/commas
-  if(/^[0\W_]+$/.test(s)) return false;           // all zeros + punctuation
+  if(!/[A-Za-z0-9]/.test(s)) return false;
+  if(/^[0\W_]+$/.test(s)) return false;
   if(JUNK_PINS.has(s.toUpperCase())) return false;
   return true;
 }
@@ -204,52 +255,72 @@ function money(v){
   return "$" + n.toLocaleString("en-US",{maximumFractionDigits:0});
 }
 function fdate(s){ return s ? String(s).slice(0,10) : ""; }
+function fdt(s){ if(!s) return ""; const d = new Date(s); return d.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"}); }
+function daysLeft(s){ if(!s) return null; return Math.ceil((new Date(s) - new Date())/86400000); }
+function deadlineTag(due){
+  const dl = daysLeft(due);
+  if(dl === null) return "";
+  if(dl < 0) return `<span class="tag closed">closed</span>`;
+  if(dl <= 14) return `<span class="tag soon">closes in ${dl} day${dl===1?"":"s"}</span>`;
+  return `<span class="tag open">open · ${dl} days left</span>`;
+}
 
 // ---- agencies ----
 async function loadAgencies(){
   try{
     const rows = await soda({"$select":"agency_name","$where":"section_name='Procurement' AND agency_name IS NOT NULL",
       "$group":"agency_name","$order":"agency_name","$limit":"600"});
-    const sel = $("#agency");
-    sel.innerHTML = '<option value="">All agencies</option>' +
-      rows.map(r=>`<option value="${encodeURIComponent(r.agency_name)}">${r.agency_name}</option>`).join("");
-    // store raw value (un-encoded) for query use
-    [...sel.options].forEach(o=>{ if(o.value) o.value = decodeURIComponent(o.value); });
+    $("#agency").innerHTML = '<option value="">All agencies</option>' +
+      rows.map(r=>`<option>${r.agency_name}</option>`).join("");
   }catch(e){ $("#agency").innerHTML = '<option value="">All agencies</option>'; }
 }
 
 // ---- search ----
-let currentRows = [];
+let currentRows = [], mode = "open";
 async function search(){
-  const agency = $("#agency").value;
-  const kw = $("#kw").value.trim();
+  mode = $("#mode").value;
+  const agency = $("#agency").value, kw = $("#kw").value.trim();
+  const sort = $("#sort").value, minamt = $("#minamt").value;
+  $("#minwrap").style.opacity = mode === "award" ? "1" : ".45";
+
+  let where = mode === "award" ? "type_of_notice_description='Award'" : "type_of_notice_description='Solicitation'";
+  if(mode === "open") where += ` AND due_date > '${todayISO()}'`;
+  if(agency) where += ` AND agency_name='${agency.replace(/'/g,"''")}'`;
+  if(mode === "award" && minamt) where += ` AND contract_amount >= ${minamt} AND contract_amount < 5000000000`;
+
+  let order;
+  if(sort === "amount") order = "contract_amount DESC";
+  else if(sort === "newest") order = "start_date DESC";
+  else order = mode === "award" ? "start_date DESC" : "due_date ASC"; // deadline only meaningful for RFPs
+
+  const heads = {open:"Open RFPs", allrfp:"All RFPs", award:"Recent Awards"};
+  $("#reshead").textContent = heads[mode] + (agency ? " · " + agency : "");
+  $("#rescount").textContent = "";
   $("#list").innerHTML = '<div class="empty"><span class="loading"></span> searching…</div>';
-  $("#reshead").textContent = "Recent RFPs" + (agency ? " · " + agency : "");
-  const p = {
-    "$select":"request_id,start_date,agency_name,type_of_notice_description,category_description,short_title,pin,contract_amount,vendor_name",
-    "$where":"type_of_notice_description='Solicitation'",
-    "$order":"start_date DESC","$limit":"40"
-  };
-  if(agency) p["$where"] += ` AND agency_name='${agency.replace(/'/g,"''")}'`;
+  const p = {"$select":SELECT,"$where":where,"$order":order,"$limit":"40"};
   if(kw) p["$q"] = kw;
   try{
     currentRows = await soda(p);
-    renderList(currentRows);
-  }catch(e){
-    $("#list").innerHTML = '<div class="empty">Could not reach NYC Open Data. Retry in a moment.</div>';
-  }
+    $("#rescount").textContent = currentRows.length === 40 ? "40+" : currentRows.length;
+    renderList();
+  }catch(e){ $("#list").innerHTML = '<div class="empty">Could not reach NYC Open Data. Retry in a moment.</div>'; }
 }
 
-function renderList(rows){
-  if(!rows.length){ $("#list").innerHTML = '<div class="empty">No solicitations found. Try a broader keyword.</div>'; return; }
-  $("#list").innerHTML = rows.map((r,i)=>`
-    <div class="row" data-i="${i}">
+function renderList(){
+  if(!currentRows.length){ $("#list").innerHTML = '<div class="empty">Nothing found. Try a broader keyword or "All RFPs".</div>'; return; }
+  $("#list").innerHTML = currentRows.map((r,i)=>{
+    const isAward = r.type_of_notice_description === "Award";
+    const lead = isAward
+      ? (money(r.contract_amount) ? `<span class="tag amt">${money(r.contract_amount)}</span>` : "")
+      : deadlineTag(r.due_date);
+    return `<div class="row" data-i="${i}">
       <p class="rtitle">${cleanText(r.short_title) || "(untitled notice)"}</p>
-      <p class="rmeta"><span class="ragency">${r.agency_name||""}</span> · ${fdate(r.start_date)}
+      <p class="rmeta">${lead}<span class="ragency">${r.agency_name||""}</span> · ${fdate(r.start_date)}
         ${r.category_description? " · "+r.category_description : ""}<br>
         ${usablePin(r.pin)? `<span class="pin">PIN ${r.pin}</span>` : `<span class="pin" style="opacity:.6">no linkable PIN</span>`}</p>
-    </div>`).join("");
-  [...document.querySelectorAll(".row")].forEach(el=>el.addEventListener("click",()=>select(+el.dataset.i, el)));
+    </div>`;
+  }).join("");
+  document.querySelectorAll(".row").forEach(el=>el.addEventListener("click",()=>select(+el.dataset.i, el)));
 }
 
 // ---- select + money trail ----
@@ -257,19 +328,17 @@ async function select(i, el){
   document.querySelectorAll(".row.sel").forEach(e=>e.classList.remove("sel"));
   el.classList.add("sel");
   const r = currentRows[i];
-  $("#detail").innerHTML = '<div class="empty"><span class="loading"></span> tracing the money…</div>';
+  $("#detail").innerHTML = '<div class="empty"><span class="loading"></span> tracing…</div>';
   const [chain, stats] = await Promise.all([ loadChain(r), loadAgencyStats(r.agency_name) ]);
   renderDetail(r, chain, stats);
 }
 
 async function loadChain(r){
-  if(!usablePin(r.pin)) return [r];               // not linkable — show the lone notice
+  if(!usablePin(r.pin)) return [r];
   try{
-    const rows = await soda({
-      "$select":"request_id,start_date,agency_name,type_of_notice_description,short_title,pin,contract_amount,vendor_name",
+    const rows = await soda({"$select":SELECT,
       "$where":`pin='${r.pin.replace(/'/g,"''")}' AND agency_name='${r.agency_name.replace(/'/g,"''")}'`,
-      "$order":"start_date ASC","$limit":"60"
-    });
+      "$order":"start_date ASC","$limit":"60"});
     rows.sort((a,b)=> (a.start_date||"").localeCompare(b.start_date||"") ||
       (STAGE_RANK[a.type_of_notice_description]??9) - (STAGE_RANK[b.type_of_notice_description]??9));
     return rows.length ? rows : [r];
@@ -278,26 +347,49 @@ async function loadChain(r){
 
 async function loadAgencyStats(agency){
   try{
-    const rows = await soda({
-      "$select":"count(1) as n, sum(contract_amount) as total",
-      "$where":`agency_name='${agency.replace(/'/g,"''")}' AND type_of_notice_description='Award' AND contract_amount > 0 AND contract_amount < 5000000000`
-    });
+    const rows = await soda({"$select":"count(1) as n, sum(contract_amount) as total",
+      "$where":`agency_name='${agency.replace(/'/g,"''")}' AND type_of_notice_description='Award' AND contract_amount > 0 AND contract_amount < 5000000000`});
     return rows[0] || null;
   }catch(e){ return null; }
 }
 
 function boxClass(t){ return t==="Award" ? "award" : (t==="Intent to Award" ? "intent" : ""); }
 
+function buildApply(r){
+  const dl = daysLeft(r.due_date);
+  const rows = [];
+  if(r.selection_method_description) rows.push(["Method", cleanText(r.selection_method_description)]);
+  if(r.contact_name) rows.push(["Contact", cleanText(r.contact_name)]);
+  if(r.email) rows.push(["Email", `<a href="mailto:${r.email}">${r.email}</a>`]);
+  if(r.contact_phone) rows.push(["Phone", cleanText(r.contact_phone)]);
+  if(r.address_to_request) rows.push(["Submit / request to", cleanText(r.address_to_request)]);
+  if(!r.due_date && !rows.length) return "";
+  const dts = rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("");
+  let due = "";
+  if(r.due_date){
+    const tag = dl === null ? "" : (dl < 0 ? `<span class="tag closed">closed</span>` :
+      dl <= 14 ? `<span class="tag soon">${dl} day${dl===1?"":"s"} left</span>` : `<span class="tag open">${dl} days left</span>`);
+    due = `<div class="due"><span class="d">Respond by ${fdt(r.due_date)}</span>${tag}</div>`;
+  }
+  return `<div class="apply"><h3>How to respond to this RFP</h3><div class="body">
+    ${due}<dl>${dts}</dl>
+    <a class="passport" href="${PASSPORT}" target="_blank" rel="noopener">Find &amp; submit on PASSPort Public ↗</a>
+    <div class="pnote">Competitive City solicitations are submitted through <b>PASSPort</b> (NYC's procurement portal). The person above is the agency's listed point of contact for this notice.</div>
+  </div></div>`;
+}
+
 function renderDetail(r, chain, stats){
   let html = "";
   if(stats && stats.n){
     html += `<div class="agencybar">
-      <div><div class="big">${money(stats.total)||"—"}</div><div class="lbl">${r.agency_name}: total awarded</div></div>
-      <div><div class="big">${(+stats.n).toLocaleString()}</div><div class="lbl">contract awards on record</div></div>
+      <div><div class="big">${money(stats.total)||"—"}</div><div class="lbl">${r.agency_name}<br>total awarded, on record</div></div>
+      <div><div class="big">${(+stats.n).toLocaleString()}</div><div class="lbl">contract awards<br>published</div></div>
     </div>`;
   }
+  if(r.type_of_notice_description === "Solicitation") html += buildApply(r);
+
   const blanket = chain.length > 5 && chain.every(c=>c.type_of_notice_description==="Award");
-  html += '<div class="chain">';
+  html += '<div class="chain-h">The paper trail (notices sharing this PIN)</div><div class="chain">';
   chain.forEach((c,idx)=>{
     const amt = money(c.contract_amount);
     html += `<div class="stage"><div class="box ${boxClass(c.type_of_notice_description)}">
@@ -315,17 +407,43 @@ function renderDetail(r, chain, stats){
   if(chain.length === 1 && !usablePin(r.pin)){
     html += `<div class="note warn">This notice's PIN isn't usable for linking (<code>${r.pin||"empty"}</code>), so its award can't be traced automatically. Open it in the City Record to read the full text.</div>`;
   } else if(chain.length === 1){
-    html += `<div class="note">Only the solicitation is on record so far — no <b>Intent to Award</b> or <b>Award</b> notice has been published for PIN <code>${r.pin}</code> yet. The award may still be pending.</div>`;
+    html += `<div class="note">Only this notice is on record so far — no later stage has been published for PIN <code>${r.pin}</code> yet. ${r.type_of_notice_description==="Solicitation"?"The award may still be pending.":""}</div>`;
   } else if(blanket){
     html += `<div class="note warn">PIN <code>${r.pin}</code> is a <b>blanket code</b>: it bundles ${chain.length} separate awards (common for emergency declarations). Each box is a distinct contract under the same code.</div>`;
   }
+
+  const scope = cleanText(r.additional_description_1);
+  if(scope) html += `<div class="scope"><span class="lbl">What they want</span>${scope.slice(0,900)}${scope.length>900?"…":""}</div>`;
   $("#detail").innerHTML = html;
+}
+
+function exportCSV(){
+  if(!currentRows.length) return;
+  const cols = [
+    ["Type", r=>r.type_of_notice_description], ["Agency", r=>r.agency_name],
+    ["Title", r=>cleanText(r.short_title)], ["Category", r=>r.category_description],
+    ["Posted", r=>fdate(r.start_date)], ["Due", r=>fdate(r.due_date)],
+    ["Days left", r=>{const d=daysLeft(r.due_date);return d==null?"":d;}],
+    ["Method", r=>cleanText(r.selection_method_description)], ["Contact", r=>cleanText(r.contact_name)],
+    ["Email", r=>r.email||""], ["Phone", r=>cleanText(r.contact_phone)],
+    ["Submit to", r=>cleanText(r.address_to_request)], ["PIN", r=>r.pin||""],
+    ["Amount", r=>r.contract_amount||""], ["CityRecordURL", r=>REQ_URL(r.request_id)]
+  ];
+  const esc = v => `"${String(v==null?"":v).replace(/"/g,'""')}"`;
+  const lines = [cols.map(c=>esc(c[0])).join(",")];
+  currentRows.forEach(r=>lines.push(cols.map(c=>esc(c[1](r))).join(",")));
+  const blob = new Blob(["﻿"+lines.join("\r\n")], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `city-record-${mode}-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
 }
 
 // ---- init ----
 $("#go").addEventListener("click", search);
+$("#export").addEventListener("click", exportCSV);
 $("#kw").addEventListener("keydown", e=>{ if(e.key==="Enter") search(); });
-$("#agency").addEventListener("change", search);
+["#mode","#agency","#sort","#minamt"].forEach(s=>$(s).addEventListener("change", search));
 $("#stamp").textContent = "Page loaded " + new Date().toISOString().slice(0,10) + ".";
 loadAgencies();
 search();
