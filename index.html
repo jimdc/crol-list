@@ -398,7 +398,8 @@
   <div class="wrap">
     <p class="deck">City property being <b>sold, auctioned, or disposed</b> — what's on the block, the sale date, and where. <span class="muted">(NYPD auctions · HPD sales · DEP land)</span></p>
     <div class="controls">
-      <div class="field kw"><label for="propertykw">Search</label><input type="text" id="propertykw" placeholder="address, neighborhood, agency…"></div>
+      <div class="field"><label for="propertyagency">Agency</label><select id="propertyagency"><option value="">All agencies</option></select></div>
+      <div class="field kw"><label for="propertykw">Search</label><input type="text" id="propertykw" placeholder="address, neighborhood…"></div>
       <div class="field" style="flex:0 0 auto"><label>&nbsp;</label><button id="propertygo">Search</button></div>
     </div>
     <div class="feed" id="propertyfeed"><div class="empty"><span class="loading"></span> loading…</div></div>
@@ -409,6 +410,7 @@
   <div class="wrap">
     <p class="deck"><b>Rules that are changing</b> — proposed &amp; adopted city regulations, by agency, with the public-comment hearing date. <span class="muted">Add it to your calendar before the window closes.</span></p>
     <div class="controls">
+      <div class="field"><label for="rulesagency">Agency</label><select id="rulesagency"><option value="">All agencies</option></select></div>
       <div class="field kw"><label for="ruleskw">Search</label><input type="text" id="ruleskw" placeholder="sanitation, licensing, rent, sidewalk…"></div>
       <div class="field" style="flex:0 0 auto"><label>&nbsp;</label><button id="rulesgo">Search</button></div>
     </div>
@@ -421,6 +423,7 @@
     <p class="deck"><b>Public meetings</b> — Community Boards, City Council, Landmarks, Board of Standards &amp; Appeals, and more. Filter, then add to your calendar.</p>
     <div class="controls">
       <div class="field"><label for="meetingswhen">Show</label><select id="meetingswhen"><option value="upcoming">Upcoming</option><option value="all">All (recent)</option></select></div>
+      <div class="field"><label for="meetingsagency">Agency</label><select id="meetingsagency"><option value="">All agencies</option></select></div>
       <div class="field kw"><label for="meetingskw">Search</label><input type="text" id="meetingskw" placeholder="Community Board, Brooklyn, landmark…"></div>
       <div class="field" style="flex:0 0 auto"><label>&nbsp;</label><button id="meetingsgo">Search</button></div>
     </div>
@@ -565,7 +568,7 @@ function showTab(name){
   document.querySelectorAll(".tabpane").forEach(p=>p.classList.toggle("active", p.id === "tab-"+name));
   document.querySelectorAll(".tabbtn").forEach(b=>b.classList.toggle("active", b.dataset.tab === name));
   if(name==="land"){ if(!landLoaded){ landLoaded=true; landSearch(); } if(landMap) setTimeout(()=>landMap.invalidateSize(),120); }
-  if(SECTIONS[name] && !feedLoaded[name]){ feedLoaded[name]=true; loadSection(name); }
+  if(SECTIONS[name] && !feedLoaded[name]){ feedLoaded[name]=true; loadSectionAgencies(name); loadSection(name); }
 }
 document.querySelectorAll(".tabbtn").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
 
@@ -1115,6 +1118,7 @@ async function loadSection(key){
   const kw=($("#"+key+"kw").value||"").trim();
   const whenSel=$("#"+key+"when");
   let where=`section_name='${cfg.section}'`, order="start_date DESC";
+  const ag=$("#"+key+"agency")?$("#"+key+"agency").value:""; if(ag) where+=` AND agency_name='${ag.replace(/'/g,"''")}'`;
   if(cfg.upcoming && (!whenSel || whenSel.value==="upcoming")){ where+=` AND event_date > '${todayISO()}'`; order="event_date ASC"; }
   const p={"$select":FEED_SELECT,"$where":where,"$order":order,"$limit":"40"};
   if(kw) p["$q"]=kw;
@@ -1123,6 +1127,14 @@ async function loadSection(key){
     const rows=await soda(p); feedRows[key]={}; rows.forEach(r=>feedRows[key][r.request_id]=r);
     renderFeed(key, rows);
   }catch(e){ $("#"+key+"feed").innerHTML='<div class="empty">Could not reach NYC Open Data. Retry.</div>'; }
+}
+
+async function loadSectionAgencies(key){
+  const sel=$("#"+key+"agency"); if(!sel) return;
+  try{
+    const rows=await soda({"$select":"agency_name","$where":`section_name='${SECTIONS[key].section}' AND agency_name IS NOT NULL`,"$group":"agency_name","$order":"agency_name","$limit":"200"});
+    sel.innerHTML='<option value="">All agencies</option>'+rows.map(r=>`<option>${r.agency_name}</option>`).join("");
+  }catch(e){}
 }
 
 function renderFeed(key, rows){
@@ -1314,6 +1326,7 @@ $("#stamp").textContent = "Page loaded " + new Date().toISOString().slice(0,10) 
   $("#"+k+"go").addEventListener("click",()=>loadSection(k));
   $("#"+k+"kw").addEventListener("keydown",e=>{ if(e.key==="Enter") loadSection(k); });
   const w=$("#"+k+"when"); if(w) w.addEventListener("change",()=>loadSection(k));
+  const ag=$("#"+k+"agency"); if(ag) ag.addEventListener("change",()=>loadSection(k));
 });
 loadAgencies();
 search();
