@@ -48,3 +48,22 @@ CSV export · `.ics` calendar · `mailto`/`tel` ✍ Respond · the title crosswa
 3. **#5 Checkbook** — strongest "follow the money" upgrade, client-side.
 4. **#1 alert delivery** — the headline "it actually emails you"; scope deliberately (email-only, daily cron, simple subscriber store).
 5. **#2 real NL**, then **#7** polish.
+
+## More of the journal to make usable (new lenses)
+
+CROL-List lenses 3 of the City Record's sections today. The same `dg92-zbpx` data has more, worth surfacing (live section counts):
+
+| Section | ~Rows | Lensed? | Feature idea |
+|---|---|---|---|
+| Changes in Personnel | 955K | ✅ People | — |
+| Procurement | 104K | ✅ Money | — |
+| Contract Award Hearings | 10.5K | — | "Speak before it's signed" — the public-comment window on a contract + hearing date (.ics) |
+| Public Hearings & Meetings | 8.9K | ◑ Land (CPC only) | **Meetings-near-you calendar** beyond rezonings — Community Board, Comptroller, Housing Authority, BERS — filter by borough/agency, add to calendar |
+| Special Materials | 8.1K | — | HPD + agency special notices |
+| Agency Rules | 3.0K | — | **"What rules are changing"** — plain-English digest of proposed/adopted city rules, by agency, with the comment deadline (high civic-engagement value) |
+| Public Comment on Contract Awards | 783 | — | folds into Contract Award Hearings above |
+| **Property Disposition** | 243 | — | **The original hook** — city property sold / auctioned / disposed. "What's being sold near you" + the demolition cross-ref (DOB). Tiny dataset, vivid |
+| Court Notices | 155 | — | legal-notices feed |
+
+**Highest value-per-effort:** **Property Disposition** (small, vivid, the founding idea) and **Agency Rules**
+(real civic utility — tell people which rules are changing and when the comment window closes).
