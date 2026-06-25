@@ -1058,7 +1058,8 @@ function digItemHTML(kind, r){
     return `<div class="digitem"><div class="dt">${cleanText(r.short_title)||"(untitled)"}</div>
     <div class="dm">${r.agency_name} · due ${fdt(r.due_date)}${dl!=null?` (${dl} days)`:""}</div>${digContact(r)}</div>`; }
   return `<div class="digitem"><div class="dt">${r.project_name||"(unnamed rezoning)"}</div>
-    <div class="dm">${r.borough||""}${r.community_district? " · CD "+r.community_district:""} · ${r.public_status||""}${r.primary_applicant? " · "+r.primary_applicant:""}${mihOn(r.mih_flag)? " · affordable housing":""}</div></div>`;
+    <div class="dm">${r.borough||""}${r.community_district? " · CD "+r.community_district:""} · ${r.public_status||""}${r.primary_applicant? " · "+r.primary_applicant:""}${mihOn(r.mih_flag)? " · affordable housing":""}</div>
+    <div class="dc"><a href="https://zap.planning.nyc.gov/projects/${r.project_id}" target="_blank" rel="noopener">↗ View &amp; comment on ZAP</a> · <a href="https://a856-cityrecord.nyc.gov/Search/Advanced" target="_blank" rel="noopener">hearing notice in City Record</a></div></div>`;
 }
 
 async function aPreview(){
