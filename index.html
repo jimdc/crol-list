@@ -172,6 +172,7 @@
   .rm.done{border-left:3px solid var(--green)}
   #landmap{display:none;height:300px;border:1px solid var(--rule);border-radius:10px;margin-top:14px;overflow:hidden;background:#eee}
   #landmapnote{margin-top:8px}
+  .landbanner{font:13px/1.5 ui-sans-serif,system-ui,sans-serif;background:#faf6ee;border-left:3px solid var(--oxblood);padding:9px 12px;color:var(--ink-soft);margin-bottom:2px}
 
   /* alerts */
   .afield{margin-bottom:14px}
@@ -445,6 +446,7 @@
 
 <footer>
   <div class="wrap">
+    <p style="margin:0 0 10px"><label style="cursor:pointer"><input type="checkbox" id="fastmode"> ⚡ Fast mode — search only the last 2 years of the City Record (saved on this device)</label></p>
     <p style="margin:0 0 10px">The dateline marks the latest edition — but CROL-List searches <b>every City Record edition from 2003 to today</b> (1M+ notices), not a single issue.</p>
     <p>Sources:
       <a href="https://data.cityofnewyork.us/City-Government/City-Record-Online/dg92-zbpx" target="_blank" rel="noopener">City Record Online (dg92-zbpx)</a> ·
@@ -470,6 +472,7 @@ const SELECT = "request_id,start_date,agency_name,type_of_notice_description,cat
 
 const $ = s => document.querySelector(s);
 const todayISO = () => new Date().toISOString().slice(0,10) + "T00:00:00";
+const fastOn = () => { try{ return localStorage.getItem("crol_fast")==="1"; }catch(e){ return false; } };
 
 async function api(base, params){
   const r = await fetch(base + "?" + new URLSearchParams(params).toString());
@@ -538,6 +541,7 @@ async function search(){
   if(mode === "open") where += ` AND due_date > '${todayISO()}'`;
   if(agency) where += ` AND agency_name='${agency.replace(/'/g,"''")}'`;
   if(mode === "award" && minamt) where += ` AND contract_amount >= ${minamt} AND contract_amount < 5000000000`;
+  if(fastOn()) where += " AND start_date > '" + new Date(Date.now()-730*86400000).toISOString().slice(0,10) + "T00:00:00'";
 
   let order;
   if(sort === "amount") order = "contract_amount DESC";
@@ -913,30 +917,50 @@ const ZAP_ACTIONS = {ZM:"Zoning map amendment",ZR:"Zoning text amendment",ZA:"Au
 let lRows=[], landLoaded=false, landMap=null, landMarker=null;
 const mihOn = v => v===true || v==="true";
 
+const ZAPBBL="https://data.cityofnewyork.us/resource/2iga-a6mk.json";
+const ZAP_SELECT="project_id,project_name,project_brief,primary_applicant,public_status,project_status,borough,community_district,actions,mih_flag,current_milestone,current_milestone_date,ulurp_numbers";
+let landBanner="";
+function zapWhere(status){ return "ulurp_non='ULURP'"+(status==="active"?" AND project_status='Active'":""); }
+
 async function landSearch(){
   const boro=$("#lboro").value, kw=$("#lkw").value.trim(), status=$("#lstatus").value;
-  $("#lreshead").textContent = "Recent rezonings" + (boro?" · "+boro:"") + (kw?` · “${kw}”`:"");
-  $("#lrescount").textContent="";
-  $("#llist").innerHTML='<div class="empty"><span class="loading"></span> searching ZAP…</div>';
-  let where="ulurp_non='ULURP'";
-  if(boro) where += ` AND borough='${boro.replace(/'/g,"''")}'`;
-  if(status==="active") where += " AND project_status='Active'";
-  const p={"$select":"project_id,project_name,project_brief,primary_applicant,public_status,project_status,borough,community_district,actions,mih_flag,current_milestone,current_milestone_date,ulurp_numbers",
-    "$where":where,"$order":"current_milestone_date DESC","$limit":"40"};
-  if(kw) p["$q"]=kw;
+  $("#lreshead").textContent = "Rezonings" + (boro?" · "+boro:"") + (kw?` · “${kw}”`:"");
+  $("#lrescount").textContent=""; landBanner="";
+  $("#llist").innerHTML='<div class="empty"><span class="loading"></span> searching…</div>';
+  let geo=null, block=null;
+  if(kw){ geo=await geocode(kw); if(geo&&geo.bbl&&/^\d{10}$/.test(geo.bbl)) block=geo.bbl.slice(0,6); }
   try{
-    lRows = await api(ZAP, p);
-    $("#lrescount").textContent = lRows.length===40?"40+":lRows.length;
+    if(block){
+      const onLot=await api(ZAPBBL,{"$select":"project_id","$where":`bbl like '${block}%'`,"$group":"project_id","$limit":"60"});
+      const ids=[...new Set(onLot.map(b=>b.project_id))].filter(Boolean).slice(0,30);
+      if(ids.length){
+        const inList=ids.map(i=>`'${i.replace(/'/g,"''")}'`).join(",");
+        lRows=await api(ZAP,{"$select":ZAP_SELECT,"$where":`${zapWhere(status)} AND project_id in(${inList})`,"$order":"current_milestone_date DESC","$limit":"40"});
+        landBanner=`📍 On this block — ${geo.label}.`;
+        if(!lRows.length){ lRows=await landNearby(geo,status); landBanner=`No ${status==="active"?"active ":""}rezoning on this block. Nearest in <b>${geo.neighbourhood||geo.borough}</b>:`; }
+      } else { lRows=await landNearby(geo,status); landBanner=`No rezoning filed on this lot (${geo.label}). Active rezonings near <b>${geo.neighbourhood||geo.borough}</b>:`; }
+    } else {
+      let w=zapWhere(status); if(boro) w+=` AND borough='${boro.replace(/'/g,"''")}'`;
+      const p={"$select":ZAP_SELECT,"$where":w,"$order":"current_milestone_date DESC","$limit":"40"}; if(kw) p["$q"]=kw;
+      lRows=await api(ZAP,p);
+    }
+    $("#lrescount").textContent=lRows.length>=40?"40+":lRows.length;
     landRenderList(kw);
-  }catch(e){ $("#llist").innerHTML='<div class="empty">Could not reach ZAP. Retry.</div>'; }
+  }catch(e){ $("#llist").innerHTML='<div class="empty">Could not reach the data. Retry.</div>'; }
+}
+
+async function landNearby(geo,status){
+  let w=zapWhere(status); if(geo&&geo.borough) w+=` AND borough='${geo.borough.replace(/'/g,"''")}'`;
+  return api(ZAP,{"$select":ZAP_SELECT,"$where":w,"$order":"current_milestone_date DESC","$limit":"40"});
 }
 
 function landRenderList(kw){
+  const head=landBanner?`<div class="landbanner">${landBanner}</div>`:"";
   if(!lRows.length){
-    $("#llist").innerHTML=`<div class="empty">No ZAP rezonings match${kw?` “${kw}”`:""}. ZAP indexes by <i>project</i>, not address — so a notice about your block can be missing here while still in <a href="https://a856-cityrecord.nyc.gov/Search/Advanced" target="_blank" rel="noopener">The City Record</a>.</div>`;
+    $("#llist").innerHTML=head+`<div class="empty">No ZAP rezonings${kw?` for “${kw}”`:""}. ZAP indexes by <i>project</i>, not address — a notice about your block can be missing here while still in <a href="https://a856-cityrecord.nyc.gov/Search/Advanced" target="_blank" rel="noopener">The City Record</a>.</div>`;
     return;
   }
-  $("#llist").innerHTML = lRows.map((r,i)=>`<div class="row" data-i="${i}">
+  $("#llist").innerHTML=head+lRows.map((r,i)=>`<div class="row" data-i="${i}">
     <p class="rtitle">${r.project_name||"(unnamed project)"}</p>
     <p class="rmeta">${mihOn(r.mih_flag)?'<span class="tag soon">affordable housing</span>':''}<span class="ragency">${r.borough||""}${r.community_district?" · CD "+r.community_district:""}</span> · ${r.public_status||r.project_status||""}<br>
       ${r.current_milestone?cleanText(r.current_milestone)+(r.current_milestone_date?" · "+fdate(r.current_milestone_date):""):""}</p>
@@ -948,7 +972,7 @@ async function geocode(q){
   try{
     const r=await fetch(`${GEO}?size=1&text=${encodeURIComponent(q)}`);
     const j=await r.json(); const f=j.features&&j.features[0];
-    if(f&&f.geometry) return {lat:f.geometry.coordinates[1],lon:f.geometry.coordinates[0],label:f.properties.label};
+    if(f&&f.geometry){const p=f.properties||{}; const pad=(p.addendum&&p.addendum.pad)||{}; return {lat:f.geometry.coordinates[1],lon:f.geometry.coordinates[0],label:p.label,borough:p.borough,neighbourhood:p.neighbourhood,bbl:pad.bbl};}
   }catch(e){}
   return null;
 }
@@ -1115,6 +1139,7 @@ $("#go").addEventListener("click", search);
 $("#nlgo").addEventListener("click", nlTranslate);
 $("#nlq").addEventListener("keydown", e=>{ if(e.key==="Enter") nlTranslate(); });
 $("#export").addEventListener("click", exportCSV);
+const _fm=$("#fastmode"); if(_fm){ _fm.checked=fastOn(); _fm.addEventListener("change",()=>{ try{localStorage.setItem("crol_fast", _fm.checked?"1":"0");}catch(e){} search(); }); }
 $("#kw").addEventListener("keydown", e=>{ if(e.key==="Enter") search(); });
 ["#mode","#agency","#sort","#minamt"].forEach(s=>$(s).addEventListener("change", search));
 
