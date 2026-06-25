@@ -173,6 +173,14 @@
   #landmap{display:none;height:300px;border:1px solid var(--rule);border-radius:10px;margin-top:14px;overflow:hidden;background:#eee}
   #landmapnote{margin-top:8px}
   .landbanner{font:13px/1.5 ui-sans-serif,system-ui,sans-serif;background:#faf6ee;border-left:3px solid var(--oxblood);padding:9px 12px;color:var(--ink-soft);margin-bottom:2px}
+  .feed{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:22px}
+  .fcard{background:var(--card);border:1px solid var(--rule);border-top:3px solid var(--blue);border-radius:12px;box-shadow:var(--shadow);padding:14px 15px;display:flex;flex-direction:column;gap:7px}
+  .fcard .ftype{font:600 11px/1.35 ui-sans-serif,system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .fcard .ftitle{font-weight:700;font-size:15px;line-height:1.3}
+  .fcard .faddr{font:13px/1.4 ui-sans-serif,system-ui,sans-serif;color:var(--ink-soft)}
+  .fcard .fscope{font-size:13.5px;line-height:1.5;color:#4a4338}
+  .fcard .factions{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto;padding-top:4px}
+  .fcard .factions .act{padding:7px 11px;font-size:12.5px}
 
   /* alerts */
   .afield{margin-bottom:14px}
@@ -232,6 +240,9 @@
       <button class="tabbtn active" data-tab="money">Money</button>
       <button class="tabbtn" data-tab="people">People</button>
       <button class="tabbtn" data-tab="land">Land</button>
+      <button class="tabbtn" data-tab="property">Property</button>
+      <button class="tabbtn" data-tab="rules">Rules</button>
+      <button class="tabbtn" data-tab="meetings">Meetings</button>
       <button class="tabbtn" data-tab="alerts">Alerts</button>
     </nav>
     <div class="cr-rule cr-rule--bottom"></div>
@@ -382,6 +393,41 @@
   </div>
 </section>
 
+<!-- ============ PROPERTY / RULES / MEETINGS (feed lenses) ============ -->
+<section id="tab-property" class="tabpane">
+  <div class="wrap">
+    <p class="deck">City property being <b>sold, auctioned, or disposed</b> — what's on the block, the sale date, and where. <span class="muted">(NYPD auctions · HPD sales · DEP land)</span></p>
+    <div class="controls">
+      <div class="field kw"><label for="propertykw">Search</label><input type="text" id="propertykw" placeholder="address, neighborhood, agency…"></div>
+      <div class="field" style="flex:0 0 auto"><label>&nbsp;</label><button id="propertygo">Search</button></div>
+    </div>
+    <div class="feed" id="propertyfeed"><div class="empty"><span class="loading"></span> loading…</div></div>
+  </div>
+</section>
+
+<section id="tab-rules" class="tabpane">
+  <div class="wrap">
+    <p class="deck"><b>Rules that are changing</b> — proposed &amp; adopted city regulations, by agency, with the public-comment hearing date. <span class="muted">Add it to your calendar before the window closes.</span></p>
+    <div class="controls">
+      <div class="field kw"><label for="ruleskw">Search</label><input type="text" id="ruleskw" placeholder="sanitation, licensing, rent, sidewalk…"></div>
+      <div class="field" style="flex:0 0 auto"><label>&nbsp;</label><button id="rulesgo">Search</button></div>
+    </div>
+    <div class="feed" id="rulesfeed"><div class="empty"><span class="loading"></span> loading…</div></div>
+  </div>
+</section>
+
+<section id="tab-meetings" class="tabpane">
+  <div class="wrap">
+    <p class="deck"><b>Public meetings</b> — Community Boards, City Council, Landmarks, Board of Standards &amp; Appeals, and more. Filter, then add to your calendar.</p>
+    <div class="controls">
+      <div class="field"><label for="meetingswhen">Show</label><select id="meetingswhen"><option value="upcoming">Upcoming</option><option value="all">All (recent)</option></select></div>
+      <div class="field kw"><label for="meetingskw">Search</label><input type="text" id="meetingskw" placeholder="Community Board, Brooklyn, landmark…"></div>
+      <div class="field" style="flex:0 0 auto"><label>&nbsp;</label><button id="meetingsgo">Search</button></div>
+    </div>
+    <div class="feed" id="meetingsfeed"><div class="empty"><span class="loading"></span> loading…</div></div>
+  </div>
+</section>
+
 <!-- ============ ALERTS (mock) ============ -->
 <section id="tab-alerts" class="tabpane">
   <div class="wrap">
@@ -519,6 +565,7 @@ function showTab(name){
   document.querySelectorAll(".tabpane").forEach(p=>p.classList.toggle("active", p.id === "tab-"+name));
   document.querySelectorAll(".tabbtn").forEach(b=>b.classList.toggle("active", b.dataset.tab === name));
   if(name==="land"){ if(!landLoaded){ landLoaded=true; landSearch(); } if(landMap) setTimeout(()=>landMap.invalidateSize(),120); }
+  if(SECTIONS[name] && !feedLoaded[name]){ feedLoaded[name]=true; loadSection(name); }
 }
 document.querySelectorAll(".tabbtn").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
 
@@ -1053,6 +1100,66 @@ function landToAlert(term){
   aPreview();
 }
 
+/* ===================== FEED LENSES (Property / Rules / Meetings) ===================== */
+const SECTIONS={
+  property:{section:"Property Disposition", topBorder:"var(--green)", showAddr:true},
+  rules:{section:"Agency Rules", topBorder:"var(--blue)"},
+  meetings:{section:"Public Hearings and Meetings", topBorder:"var(--amber)", upcoming:true}
+};
+const feedRows={}, feedLoaded={};
+const FEED_SELECT="request_id,start_date,event_date,agency_name,type_of_notice_description,short_title,street_address_1,additional_description_1";
+function goodAddr(a){ return a && !/not listed|^n\/?a$|^none$|^various|^see /i.test(a.trim()); }
+
+async function loadSection(key){
+  const cfg=SECTIONS[key];
+  const kw=($("#"+key+"kw").value||"").trim();
+  const whenSel=$("#"+key+"when");
+  let where=`section_name='${cfg.section}'`, order="start_date DESC";
+  if(cfg.upcoming && (!whenSel || whenSel.value==="upcoming")){ where+=` AND event_date > '${todayISO()}'`; order="event_date ASC"; }
+  const p={"$select":FEED_SELECT,"$where":where,"$order":order,"$limit":"40"};
+  if(kw) p["$q"]=kw;
+  $("#"+key+"feed").innerHTML='<div class="empty"><span class="loading"></span> searching…</div>';
+  try{
+    const rows=await soda(p); feedRows[key]={}; rows.forEach(r=>feedRows[key][r.request_id]=r);
+    renderFeed(key, rows);
+  }catch(e){ $("#"+key+"feed").innerHTML='<div class="empty">Could not reach NYC Open Data. Retry.</div>'; }
+}
+
+function renderFeed(key, rows){
+  const cfg=SECTIONS[key], el=$("#"+key+"feed");
+  if(!rows.length){ el.innerHTML='<div class="empty">Nothing found. Try a broader search.</div>'; return; }
+  el.innerHTML=rows.map(r=>{
+    const ev=r.event_date, addr=cfg.showAddr&&goodAddr(r.street_address_1)?cleanText(r.street_address_1):"";
+    const scope=cleanText(r.additional_description_1).slice(0,200);
+    let acts=`<a class="act" href="${REQ_URL(r.request_id)}" target="_blank" rel="noopener">↗ City Record</a>`;
+    if(ev) acts+=`<button class="act" type="button" data-ev="${key}:${r.request_id}">📅 Add ${fdt(ev)}</button>`;
+    if(addr) acts+=`<a class="act" href="https://www.google.com/maps/search/${encodeURIComponent(addr+' New York NY')}" target="_blank" rel="noopener">🗺 Map</a>`;
+    return `<div class="fcard" style="border-top-color:${cfg.topBorder}">
+      <div class="ftype">${r.type_of_notice_description||""}${r.agency_name?" · "+r.agency_name:""}${ev?` · <b style="color:var(--ink)">${fdt(ev)}</b>`:""}</div>
+      <div class="ftitle">${cleanText(r.short_title)||"(untitled)"}</div>
+      ${addr?`<div class="faddr">📍 ${addr}</div>`:""}
+      ${scope?`<div class="fscope">${scope}${scope.length>=200?"…":""}</div>`:""}
+      <div class="factions">${acts}</div>
+    </div>`;
+  }).join("");
+  el.querySelectorAll("[data-ev]").forEach(b=>b.addEventListener("click",()=>{ const i=b.dataset.ev.indexOf(":"); downloadEventICS(feedRows[b.dataset.ev.slice(0,i)][b.dataset.ev.slice(i+1)]); }));
+}
+
+function downloadEventICS(r){
+  if(!r||!r.event_date) return;
+  const d=new Date(r.event_date), pad=n=>String(n).padStart(2,"0");
+  const fl=dt=>`${dt.getFullYear()}${pad(dt.getMonth()+1)}${pad(dt.getDate())}T${pad(dt.getHours())}${pad(dt.getMinutes())}00`;
+  const esc=s=>String(s||"").replace(/([,;\\])/g,"\\$1").replace(/\n/g,"\\n");
+  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//CROL-List//EN","CALSCALE:GREGORIAN","METHOD:PUBLISH",
+    "BEGIN:VEVENT","UID:"+r.request_id+"@crol-list","DTSTAMP:"+fl(new Date()),"DTSTART:"+fl(d),"DTEND:"+fl(d),
+    "SUMMARY:"+esc(cleanText(r.short_title)),
+    "DESCRIPTION:"+esc(`${r.agency_name||""}${goodAddr(r.street_address_1)?" · "+cleanText(r.street_address_1):""} · ${REQ_URL(r.request_id)}`),
+    "BEGIN:VALARM","TRIGGER:-P1D","ACTION:DISPLAY","DESCRIPTION:Tomorrow","END:VALARM",
+    "END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const blob=new Blob([ics],{type:"text/calendar;charset=utf-8"}); const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=`crol-${r.request_id}.ics`; document.body.appendChild(a); a.click(); a.remove();
+}
+
 /* ===================== ALERTS (mock) ===================== */
 let aChannel = "email";
 const AKEY = "crd_alerts_v1";
@@ -1203,6 +1310,11 @@ $("#stamp").textContent = "Page loaded " + new Date().toISOString().slice(0,10) 
   const el=$("#dateline");
   if(el) el.innerHTML=`<span>Vol.&nbsp;${rom(now.getFullYear()-1873)}</span><span class="cr-dot">&middot;</span><span>No.&nbsp;${n}</span><span class="cr-dot">&middot;</span><span>New&nbsp;York, <time datetime="${now.toISOString().slice(0,10)}">${fmt}</time></span>`;
 })();
+["property","rules","meetings"].forEach(k=>{
+  $("#"+k+"go").addEventListener("click",()=>loadSection(k));
+  $("#"+k+"kw").addEventListener("keydown",e=>{ if(e.key==="Enter") loadSection(k); });
+  const w=$("#"+k+"when"); if(w) w.addEventListener("change",()=>loadSection(k));
+});
 loadAgencies();
 search();
 aWatchChange();
