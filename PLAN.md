@@ -23,6 +23,7 @@ need a **thin backend**; everything else can stay client-side:
 | 5 | **Money shows awarded $ only** (City Record, $5B outlier cap) | Join **Checkbook NYC** by PIN → dollars **actually paid** + vendor track record + M/WBE | No (CORS) | M |
 | 6 | **Dateline "Vol. CLIII · No. 120"** was hardcoded | ✅ now computed (Vol = year−1873 in Roman; No. = weekdays elapsed) + a footer note that we span every edition | No | done |
 | 7 | **City seal** is a stylized SVG placeholder | Drop in the real NYC arms SVG | No | S |
+| 8 | **"Find in City Record" links are generic search** (rezone/alert items) | Resolve the *specific* notice: query `dg92-zbpx` by ULURP number / PIN → deep-link to `RequestDetail/{request_id}` (procurement already does this; extend to land + alerts) | No | M |
 
 ## Robustness: cache a snapshot as a fallback (recommended for demo day)
 

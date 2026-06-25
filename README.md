@@ -8,10 +8,10 @@ hearings, and rezonings there. It's the city's daily newspaper of government, an
 read it: a dense stream of disconnected legal notices. **CROL-List** re-links those notices into
 something a person can actually follow.
 
-**Live (no login):** https://jimdc.github.io/city-record-money-map/
+**Live (no login):** https://jimdc.github.io/crol-list/
 
-> The repo slug is still `city-record-money-map` so the shared link keeps working; the product is
-> **CROL-List** everywhere it's read.
+> The repo was renamed to `crol-list`; the old `…/city-record-money-map/` link auto-redirects, so
+> previously-shared links keep working.
 
 ## What it does — four lenses
 
