@@ -1,0 +1,418 @@
+[
+ {
+  "keyword": "POLICE OFFICER",
+  "label": "Police Officer",
+  "official_title": "POLICE OFFICER",
+  "competitive": true,
+  "base_min": 43456,
+  "base_median": 109352,
+  "base_max": 109352,
+  "headcount": 24153,
+  "ladder": [
+   {
+    "title": "ENVIRONMENTAL POLICE OFFICER-MANAGERIAL",
+    "avg": 181634
+   },
+   {
+    "title": "POLICE OFFICER D/A DETECTIVE 1ST GR",
+    "avg": 152696
+   },
+   {
+    "title": "POLICE OFFICER D/A DETECTIVE 2ND GR",
+    "avg": 133449
+   },
+   {
+    "title": "POLICE OFFICER",
+    "avg": 85299
+   },
+   {
+    "title": "ENVIRONMENTAL POLICE OFFICER",
+    "avg": 79766
+   }
+  ],
+  "note": "The classic exam-gated uniformed job: ~24,000 officers, a flat $109,352 base; the ladder shows D/A detective tiers and managerial titles climbing to ~$182k."
+ },
+ {
+  "keyword": "FIREFIGHTER",
+  "label": "Firefighter",
+  "official_title": "FIREFIGHTER",
+  "competitive": true,
+  "base_min": 50524,
+  "base_median": 109352,
+  "base_max": 109352,
+  "headcount": 9187,
+  "ladder": [
+   {
+    "title": "FIREFIGHTER",
+    "avg": 94424
+   }
+  ],
+  "note": "One single competitive title, ~9,200 firefighters, all at the same $109,352 top base \u2014 a textbook exam-gated, flat-pay civil-service role."
+ },
+ {
+  "keyword": "EMERGENCY MEDICAL",
+  "label": "EMT & Paramedic",
+  "official_title": "EMERGENCY MEDICAL SPECIALIST-EMT",
+  "competitive": true,
+  "base_min": 39386,
+  "base_median": 49047,
+  "base_max": 62393,
+  "headcount": 2953,
+  "ladder": [
+   {
+    "title": "SUPERVISING EMERGENCY MEDICAL SERVICE SPECIALIST-DPTY CHIEFS",
+    "avg": 129036
+   },
+   {
+    "title": "SUPERVISING EMERGENCY MEDICAL SERVICE SPECIALIST",
+    "avg": 81763
+   },
+   {
+    "title": "EMERGENCY MEDICAL SPECIALIST-PARAMEDIc",
+    "avg": 69004
+   },
+   {
+    "title": "EMERGENCY MEDICAL SPECIALIST-EMT",
+    "avg": 50626
+   },
+   {
+    "title": "EMERGENCY MEDICAL SPECIALIST TRAINEE",
+    "avg": 36341
+   }
+  ],
+  "note": "A full exam-gated career ladder in one search: EMT ($49,047) to Paramedic to Supervising Specialist, all competitive titles."
+ },
+ {
+  "keyword": "CORRECTION OFFICER",
+  "label": "Correction Officer",
+  "official_title": "CORRECTION OFFICER",
+  "competitive": true,
+  "base_min": 41224,
+  "base_median": 105146,
+  "base_max": 105146,
+  "headcount": 8082,
+  "ladder": [
+   {
+    "title": "CORRECTION OFFICER",
+    "avg": 93170
+   }
+  ],
+  "note": "A single competitive title, ~8,000 officers at a $105,146 median \u2014 another exam-gated uniformed force with flat top pay."
+ },
+ {
+  "keyword": "SANITATION WORKER",
+  "label": "Sanitation Worker",
+  "official_title": "SANITATION WORKER",
+  "competitive": true,
+  "base_min": 43305,
+  "base_median": 92093,
+  "base_max": 99142,
+  "headcount": 7263,
+  "ladder": [
+   {
+    "title": "SANITATION WORKER",
+    "avg": 78336
+   }
+  ],
+  "note": "Exam-gated and surprisingly well paid: ~7,300 workers at a $92,093 median base, more than EMTs or school-safety agents."
+ },
+ {
+  "keyword": "SCHOOL SAFETY AGENT",
+  "label": "School Safety Agent",
+  "official_title": "SCHOOL SAFETY AGENT",
+  "competitive": true,
+  "base_min": 34937,
+  "base_median": 56508,
+  "base_max": 56508,
+  "headcount": 4017,
+  "ladder": [
+   {
+    "title": "SCHOOL SAFETY AGENT",
+    "avg": 52273
+   }
+  ],
+  "note": "An exam title inside the NYPD with the lowest band of the uniformed roles \u2014 ~4,000 agents at a $56,508 median."
+ },
+ {
+  "keyword": "TEACHER",
+  "label": "Public-School Teacher",
+  "official_title": "TEACHER",
+  "competitive": false,
+  "base_min": 58,
+  "base_median": 110848,
+  "base_max": 160588,
+  "headcount": 56041,
+  "ladder": [
+   {
+    "title": "ADULT EDUCATION TEACHER",
+    "avg": 133248
+   },
+   {
+    "title": "TEACHER ASSIGNED A",
+    "avg": 122643
+   },
+   {
+    "title": "TEACHER TRAINER",
+    "avg": 117740
+   },
+   {
+    "title": "TEACHER ASSIGNED B",
+    "avg": 117703
+   },
+   {
+    "title": "TEACHER ATTENDANCE",
+    "avg": 112535
+   },
+   {
+    "title": "TEACHER",
+    "avg": 110282
+   }
+  ],
+  "note": "Wow caveat: DOE teachers are licensed, not civil-service-competitive, so they show as NO-EXAM here despite ~56,000 staff at a $110,848 median; per-session rows at the bottom are hourly-coded."
+ },
+ {
+  "keyword": "ADMINISTRATIVE STAFF ANALYST",
+  "label": "Administrative Staff Analyst",
+  "official_title": "ADMINISTRATIVE STAFF ANALYST",
+  "competitive": true,
+  "base_min": 52,
+  "base_median": 128122,
+  "base_max": 293094,
+  "headcount": 2151,
+  "ladder": [
+   {
+    "title": "ADMINISTRATIVE STAFF ANALYST",
+    "avg": 139373
+   }
+  ],
+  "note": "The widest range in the city: one exam title spanning $52 to $293,094 (median $128,122) \u2014 same title, a 5,600x base spread driven by part-time and senior managers."
+ },
+ {
+  "keyword": "CIVIL ENGINEER",
+  "label": "Civil Engineer",
+  "official_title": "CIVIL ENGINEER",
+  "competitive": true,
+  "base_min": 90551,
+  "base_median": 116808,
+  "base_max": 142125,
+  "headcount": 150,
+  "ladder": [
+   {
+    "title": "CIVIL ENGINEER",
+    "avg": 116419
+   },
+   {
+    "title": "ASSISTANT CIVIL ENGINEER",
+    "avg": 82273
+   },
+   {
+    "title": "CIVIL ENGINEERING INTERN",
+    "avg": 67899
+   }
+  ],
+  "note": "A clean three-rung exam ladder: Intern to Assistant Civil Engineer to Civil Engineer ($116,808) \u2014 every rung competitive."
+ },
+ {
+  "keyword": "ACCOUNTANT",
+  "label": "Accountant",
+  "official_title": "ACCOUNTANT",
+  "competitive": false,
+  "base_min": 36,
+  "base_median": 76423,
+  "base_max": 107255,
+  "headcount": 277,
+  "ladder": [
+   {
+    "title": "PRINCIPAL ACCOUNTANT INVESTIGATOR",
+    "avg": 140204
+   },
+   {
+    "title": "CHIEF INVESTIGATING ACCOUNTANT",
+    "avg": 139001
+   },
+   {
+    "title": "ADMINISTRATIVE ACCOUNTANT",
+    "avg": 122383
+   },
+   {
+    "title": "SUPERVISING ACCOUNTANT INVESTIGATOR",
+    "avg": 110853
+   },
+   {
+    "title": "SENIOR ACCOUNTANT INVESTIGATOR",
+    "avg": 86793
+   },
+   {
+    "title": "ACCOUNTANT",
+    "avg": 79618
+   }
+  ],
+  "note": "Surprise: the base ACCOUNTANT title is NO-EXAM (median $76,423), while ADMINISTRATIVE ACCOUNTANT above it on the ladder IS exam-gated \u2014 same family, different gate."
+ },
+ {
+  "keyword": "COMPUTER SYSTEMS MANAGER",
+  "label": "Computer Systems Manager",
+  "official_title": "COMPUTER SYSTEMS MANAGER",
+  "competitive": true,
+  "base_min": 26,
+  "base_median": 159485,
+  "base_max": 283595,
+  "headcount": 1425,
+  "ladder": [
+   {
+    "title": "COMPUTER SYSTEMS MANAGER",
+    "avg": 162830
+   }
+  ],
+  "note": "High-paid tech that still requires an exam: ~1,400 managers, median $159,485, topping out near $284k."
+ },
+ {
+  "keyword": "ARCHITECT",
+  "label": "Architect",
+  "official_title": "ARCHITECT",
+  "competitive": true,
+  "base_min": 72668,
+  "base_median": 112554,
+  "base_max": 142223,
+  "headcount": 67,
+  "ladder": [
+   {
+    "title": "ADMINISTRATIVE LANDSCAPE ARCHITECT",
+    "avg": 161850
+   },
+   {
+    "title": "SENIOR IT ARCHITECT",
+    "avg": 156666
+   },
+   {
+    "title": "ADMINISTRATIVE ARCHITECT",
+    "avg": 151443
+   },
+   {
+    "title": "UNIVERSITY ARCHITECT",
+    "avg": 135228
+   },
+   {
+    "title": "LANDSCAPE ARCHITECT",
+    "avg": 115455
+   },
+   {
+    "title": "ARCHITECT",
+    "avg": 113962
+   }
+  ],
+  "note": "A mixed ladder: licensed ARCHITECT and ADMINISTRATIVE ARCHITECT are exam titles, but SENIOR IT ARCHITECT (top of the list) is no-exam \u2014 exam status doesn't track pay."
+ },
+ {
+  "keyword": "ATTORNEY",
+  "label": "Attorney / Agency Attorney",
+  "official_title": "AGENCY ATTORNEY",
+  "competitive": false,
+  "base_min": 45,
+  "base_median": 108350,
+  "base_max": 146052,
+  "headcount": 1191,
+  "ladder": [
+   {
+    "title": "DISTRICT ATTORNEY",
+    "avg": 232600
+   },
+   {
+    "title": "SPECIAL ASSISTANT DISTRICT ATTORNEY",
+    "avg": 231600
+   },
+   {
+    "title": "SPECIAL ASSISTANT TO THE DISTRICT ATTORNEY",
+    "avg": 165158
+   },
+   {
+    "title": "*AGENCY ATTORNEY",
+    "avg": 142702
+   },
+   {
+    "title": "EXAMINING ATTORNEY",
+    "avg": 138258
+   },
+   {
+    "title": "CONFIDENTIAL ASST OFFICE OF DISTRICT ATTORNEY, KING COUNTY",
+    "avg": 134921
+   }
+  ],
+  "note": "The no-exam gap in one search: ZERO attorney titles appear on the Civil Service List, so all are no-exam \u2014 from Agency Attorney (median $108,350) up to District Attorney at $232,600."
+ },
+ {
+  "keyword": "COMMISSIONER",
+  "label": "Commissioner / Deputy Commissioner",
+  "official_title": "DEPUTY COMMISSIONER",
+  "competitive": false,
+  "base_min": 122004,
+  "base_median": 242966,
+  "base_max": 285577,
+  "headcount": 103,
+  "ladder": [
+   {
+    "title": "COMMISSIONER OF DEPT OF INFO TECHNOLOGY & TELECOMMUNICATIONS",
+    "avg": 291821
+   },
+   {
+    "title": "COMMISSIONER OF ENVIRONMENTAL PROTECTION",
+    "avg": 291821
+   },
+   {
+    "title": "COMMISSIONER OF BUILDINGS",
+    "avg": 286627
+   },
+   {
+    "title": "COMMISSIONER OF TRANSPORTATION",
+    "avg": 286627
+   },
+   {
+    "title": "COMMISSIONER OF EMERGENCY MANAGEMENT",
+    "avg": 286627
+   },
+   {
+    "title": "COMMISSIONER OF CHILDREN'S SERVICES",
+    "avg": 286627
+   }
+  ],
+  "note": "The high-paid no-exam wow: every commissioner title is appointed (no exam), topping out at $291,821 for agency heads; Deputy Commissioner median is $242,966."
+ },
+ {
+  "keyword": "CITY PLANNER",
+  "label": "City Planner",
+  "official_title": "CITY PLANNER",
+  "competitive": true,
+  "base_min": 64156,
+  "base_median": 98088,
+  "base_max": 137939,
+  "headcount": 314,
+  "ladder": [
+   {
+    "title": "ADMINISTRATIVE CITY PLANNER",
+    "avg": 144557
+   },
+   {
+    "title": "CITY PLANNER",
+    "avg": 98819
+   }
+  ],
+  "note": "Counter-intuitive: despite being a policy/discretion job, City Planner (median $98,088) and Administrative City Planner ARE exam-gated competitive titles."
+ },
+ {
+  "keyword": "ADMINISTRATIVE ENGINEER",
+  "label": "Administrative Engineer",
+  "official_title": "ADMINISTRATIVE ENGINEER",
+  "competitive": true,
+  "base_min": 69,
+  "base_median": 156639,
+  "base_max": 278769,
+  "headcount": 517,
+  "ladder": [
+   {
+    "title": "ADMINISTRATIVE ENGINEER",
+    "avg": 164640
+   }
+  ],
+  "note": "A high-paid exam title: ~520 administrative engineers, median $156,639, the senior managerial rung of the competitive engineering ladder."
+ }
+]

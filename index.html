@@ -139,6 +139,8 @@
   .rm{border:1px solid var(--rule);border-radius:10px;padding:13px 14px;background:#fff}
   .rm b{display:block;margin-bottom:4px}
   .rm.done{border-left:3px solid var(--green)}
+  #landmap{display:none;height:300px;border:1px solid var(--rule);border-radius:10px;margin-top:14px;overflow:hidden;background:#eee}
+  #landmapnote{margin-top:8px}
 
   /* alerts */
   .afield{margin-bottom:14px}
@@ -172,6 +174,8 @@
   footer h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 8px;color:var(--ink)}
   .caveat{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;margin-top:14px}
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 <header class="masthead">
@@ -286,25 +290,35 @@
 <!-- ============ LAND ============ -->
 <section id="tab-land" class="tabpane">
   <div class="wrap">
-    <p class="deck">City Planning rezoning notices are pure legalese — <i>“changing from an R7-1 District to an R8 District
-      bounded by…”</i>. This lens turns each into a plain-English card: applicant, what's being built, and a map —
-      cross-referenced to the open <a href="https://data.cityofnewyork.us/City-Government/Zoning-Application-Portal-ZAP-Project-Data/hgx4-8ukb" target="_blank" rel="noopener">ZAP project dataset</a>
-      and the <a href="https://zap.planning.nyc.gov/" target="_blank" rel="noopener">ZAP portal</a>.</p>
-
-    <div class="landcard">
-      <h3>Worked example — the build target</h3>
-      <div class="example">
-        <div class="leg">City Record: “…IN THE MATTER OF an application … Allen Street Mall … 79 Rivington Street, Manhattan … amendment of the Zoning Map …”</div>
-        <span class="arrow">↓ decoded ↓</span>
-        <div><b>79 Rivington Street / Allen Street Mall rezoning</b> — Lower East Side, Manhattan (CD 3). Cross-referenced to its ZAP project (applicant, units, MIH affordable housing, ULURP status) and pinned on a map of the affected lots.</div>
+    <p class="deck">City Planning rezoning notices are pure legalese — <i>“changing from an R7-1 District to an R8 District bounded by…”</i>.
+      This reads NYC's land-use pipeline and cross-references each to its <a href="https://zap.planning.nyc.gov/" target="_blank" rel="noopener">ZAP</a>
+      project — applicant, what's being built, affordable housing, status — and pins it on a map.</p>
+    <div class="controls">
+      <div class="field">
+        <label for="lboro">Borough</label>
+        <select id="lboro">
+          <option value="">All boroughs</option>
+          <option>Manhattan</option><option>Brooklyn</option><option>Queens</option><option>Bronx</option><option>Staten Island</option>
+        </select>
       </div>
-      <h3 style="margin-top:18px">Roadmap (data spine already verified)</h3>
-      <div class="roadmap">
-        <div class="rm done"><b>✓ ZAP is open data</b>Project dataset <code>hgx4-8ukb</code> + ZAP-BBL <code>2iga-a6mk</code> — no scraping. ULURP number → project → applicant/units/status.</div>
-        <div class="rm done"><b>✓ Geocode + map</b>Planning Labs GeoSearch (address → lat/lon + BBL) and MapPLUTO lot polygons to draw the rezoned area.</div>
-        <div class="rm"><b>Recent Rezonings feed</b>Live City Record land-use notices → plain-English cards, the example above generalized.</div>
-        <div class="rm"><b>Is it still standing?</b>DOB demolition permits joined by BBL — the original “house demolished” signal.</div>
-        <div class="rm"><b>RSS + email alerts</b>Subscribe by address or neighborhood; a scheduled refresh emails new rezonings near you.</div>
+      <div class="field kw">
+        <label for="lkw">ZIP, address, or neighborhood</label>
+        <input type="text" id="lkw" placeholder="Bushwick, 79 Rivington, Gowanus…">
+      </div>
+      <div class="field">
+        <label for="lstatus">Status</label>
+        <select id="lstatus"><option value="active">In review / active</option><option value="all">All</option></select>
+      </div>
+      <div class="field" style="flex:0 0 auto"><label>&nbsp;</label><button id="lgo">Search</button></div>
+    </div>
+    <div class="grid">
+      <div class="panel">
+        <h2><span><span id="lreshead">Recent rezonings</span> <span class="count" id="lrescount"></span></span></h2>
+        <div class="list" id="llist"><div class="empty"><span class="loading"></span> loading…</div></div>
+      </div>
+      <div class="panel">
+        <h2>Decoded</h2>
+        <div class="detail" id="ldetail"><div class="empty">Pick a rezoning to see it in plain English — applicant, what's being built, affordable units, status — and on a map. Try “79 Rivington” or “Gowanus”.</div></div>
       </div>
     </div>
   </div>
@@ -454,6 +468,7 @@ function deadlineTag(due){
 function showTab(name){
   document.querySelectorAll(".tabpane").forEach(p=>p.classList.toggle("active", p.id === "tab-"+name));
   document.querySelectorAll(".tabbtn").forEach(b=>b.classList.toggle("active", b.dataset.tab === name));
+  if(name==="land"){ if(!landLoaded){ landLoaded=true; landSearch(); } if(landMap) setTimeout(()=>landMap.invalidateSize(),120); }
 }
 document.querySelectorAll(".tabbtn").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
 
@@ -811,6 +826,94 @@ async function pSelectPerson(i, el){
   $("#pdetail").innerHTML = html;
 }
 
+/* ===================== LAND ===================== */
+const ZAP = "https://data.cityofnewyork.us/resource/hgx4-8ukb.json";
+const GEO = "https://geosearch.planninglabs.nyc/v2/search";
+const BORO_CENTER = {Manhattan:[40.776,-73.971],Brooklyn:[40.650,-73.950],Bronx:[40.844,-73.865],Queens:[40.718,-73.806],"Staten Island":[40.580,-74.150]};
+const ZAP_ACTIONS = {ZM:"Zoning map amendment",ZR:"Zoning text amendment",ZA:"Authorization",ZC:"Certification",ZS:"Special permit",HA:"Disposition (HPD)",PC:"Acquisition",PQ:"Acquisition",HG:"Urban renewal"};
+let lRows=[], landLoaded=false, landMap=null, landMarker=null;
+const mihOn = v => v===true || v==="true";
+
+async function landSearch(){
+  const boro=$("#lboro").value, kw=$("#lkw").value.trim(), status=$("#lstatus").value;
+  $("#lreshead").textContent = "Recent rezonings" + (boro?" · "+boro:"") + (kw?` · “${kw}”`:"");
+  $("#lrescount").textContent="";
+  $("#llist").innerHTML='<div class="empty"><span class="loading"></span> searching ZAP…</div>';
+  let where="ulurp_non='ULURP'";
+  if(boro) where += ` AND borough='${boro.replace(/'/g,"''")}'`;
+  if(status==="active") where += " AND project_status='Active'";
+  const p={"$select":"project_id,project_name,project_brief,primary_applicant,public_status,project_status,borough,community_district,actions,mih_flag,current_milestone,current_milestone_date,ulurp_numbers",
+    "$where":where,"$order":"current_milestone_date DESC","$limit":"40"};
+  if(kw) p["$q"]=kw;
+  try{
+    lRows = await api(ZAP, p);
+    $("#lrescount").textContent = lRows.length===40?"40+":lRows.length;
+    landRenderList(kw);
+  }catch(e){ $("#llist").innerHTML='<div class="empty">Could not reach ZAP. Retry.</div>'; }
+}
+
+function landRenderList(kw){
+  if(!lRows.length){
+    $("#llist").innerHTML=`<div class="empty">No ZAP rezonings match${kw?` “${kw}”`:""}. ZAP indexes by <i>project</i>, not address — so a notice about your block can be missing here while still in <a href="https://a856-cityrecord.nyc.gov/Search/Advanced" target="_blank" rel="noopener">The City Record</a>.</div>`;
+    return;
+  }
+  $("#llist").innerHTML = lRows.map((r,i)=>`<div class="row" data-i="${i}">
+    <p class="rtitle">${r.project_name||"(unnamed project)"}</p>
+    <p class="rmeta">${mihOn(r.mih_flag)?'<span class="tag soon">affordable housing</span>':''}<span class="ragency">${r.borough||""}${r.community_district?" · CD "+r.community_district:""}</span> · ${r.public_status||r.project_status||""}<br>
+      ${r.current_milestone?cleanText(r.current_milestone)+(r.current_milestone_date?" · "+fdate(r.current_milestone_date):""):""}</p>
+  </div>`).join("");
+  document.querySelectorAll("#llist .row").forEach(el=>el.addEventListener("click",()=>landSelect(+el.dataset.i, el)));
+}
+
+async function geocode(q){
+  try{
+    const r=await fetch(`${GEO}?size=1&text=${encodeURIComponent(q)}`);
+    const j=await r.json(); const f=j.features&&j.features[0];
+    if(f&&f.geometry) return {lat:f.geometry.coordinates[1],lon:f.geometry.coordinates[0],label:f.properties.label};
+  }catch(e){}
+  return null;
+}
+
+async function landSelect(i, el){
+  document.querySelectorAll("#llist .row.sel").forEach(e=>e.classList.remove("sel"));
+  el.classList.add("sel");
+  const r=lRows[i];
+  if(landMap){ try{landMap.remove();}catch(e){} landMap=null; landMarker=null; }
+  const actList=(r.actions||"").split(/[;,]/).map(a=>ZAP_ACTIONS[a.trim()]||(a.trim()||null)).filter(Boolean);
+  let html=`<div class="rolename">${r.project_name||"(unnamed)"}</div>
+    <div class="badges">
+      <span class="tag ${r.project_status==='Active'?'open':'closed'}">${r.public_status||r.project_status||"status n/a"}</span>
+      ${mihOn(r.mih_flag)?'<span class="tag soon">Mandatory Inclusionary Housing</span>':''}
+    </div>
+    <div class="agencybar">
+      <div><div class="big" style="font-size:17px">${r.primary_applicant||"—"}</div><div class="lbl">applicant</div></div>
+      <div><div class="big" style="font-size:17px">${r.borough||""}${r.community_district?" · CD "+r.community_district:""}</div><div class="lbl">where</div></div>
+    </div>`;
+  if(r.project_brief) html+=`<div class="scope"><span class="lbl">In plain English</span>${cleanText(r.project_brief)}</div>`;
+  if(actList.length) html+=`<div class="rmeta2" style="margin-top:10px"><b>Actions:</b> ${actList.join(" · ")}</div>`;
+  html+=`<div class="actions" style="margin-top:12px">
+    <a class="act primary" href="https://zap.planning.nyc.gov/projects/${r.project_id}" target="_blank" rel="noopener">↗ Full project on ZAP</a>
+    <a class="act" href="https://a856-cityrecord.nyc.gov/Search/Advanced" target="_blank" rel="noopener">Find the notice in City Record</a>
+  </div>
+  <div id="landmap"></div><div class="note" id="landmapnote"><span class="loading"></span> locating…</div>`;
+  $("#ldetail").innerHTML=html;
+  const q=(r.project_name||"").replace(/rezoning|special (mixed use )?district|text amendment|\bnos?\.?\b/ig," ").replace(/\s+/g," ").trim();
+  const geo = q ? await geocode(q+" "+(r.borough||"")+" New York") : null;
+  if(geo) landShowMap(geo.lat,geo.lon,geo.label);
+  else { const c=BORO_CENTER[r.borough]; if(c) landShowMap(c[0],c[1],(r.borough||"")+" — exact lot not geocoded"); else { $("#landmap").style.display="none"; $("#landmapnote").textContent="Location not resolved."; } }
+}
+
+function landShowMap(lat, lon, label){
+  const el=$("#landmap"); if(!el) return; el.style.display="block";
+  $("#landmapnote").innerHTML=`📍 ${label}. <span class="muted">Approximate — confirm exact lots on <a href="https://zola.planning.nyc.gov/" target="_blank" rel="noopener">ZoLa</a>.</span>`;
+  if(typeof L==="undefined"){ el.innerHTML='<div class="empty">Map needs a connection.</div>'; return; }
+  landMap=L.map(el).setView([lat,lon],15);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:19}).addTo(landMap);
+  landMarker=L.marker([lat,lon]).addTo(landMap);
+  if(label) landMarker.bindPopup(label).openPopup();
+  setTimeout(()=>{ if(landMap) landMap.invalidateSize(); },150);
+}
+
 /* ===================== ALERTS (mock) ===================== */
 let aChannel = "email";
 const AKEY = "crd_alerts_v1";
@@ -923,6 +1026,10 @@ document.querySelectorAll(".segbtn").forEach(b=>b.addEventListener("click",()=>{
   $("#adestlabel").textContent = aChannel==="email" ? "Email address" : "Phone number";
   $("#adest").placeholder = aChannel==="email" ? "you@example.com" : "+1 (555) 012-3456";
 }));
+
+$("#lgo").addEventListener("click", landSearch);
+$("#lkw").addEventListener("keydown", e=>{ if(e.key==="Enter") landSearch(); });
+["#lboro","#lstatus"].forEach(s=>$(s).addEventListener("change", landSearch));
 
 $("#stamp").textContent = "Page loaded " + new Date().toISOString().slice(0,10) + ".";
 loadAgencies();
