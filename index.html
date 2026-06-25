@@ -1055,8 +1055,13 @@ function digItemHTML(kind, r){
     <div class="dm">${r.agency_name} · ${fdate(r.start_date)}${r.vendor_name? " · "+cleanText(r.vendor_name):""}</div>
     <div class="da">${money(r.contract_amount)||""}</div>${digContact(r)}</div>`;
   if(kind==="rfp"){ const dl=daysLeft(r.due_date);
+    const tel=String(r.contact_phone||"").replace(/[^0-9+]/g,""); const acts=[];
+    if(r.email) acts.push(`<a href="${mailtoFor(r)}"><b>✍ Respond</b></a>`);
+    if(r.email) acts.push(`<a href="mailto:${r.email}">✉ ${r.email}</a>`);
+    if(tel.length>=7) acts.push(`<a href="tel:${tel}">☎ ${cleanText(r.contact_phone)}</a>`);
+    const dc=acts.length?`<div class="dc">${acts.join(" · ")}</div>`:"";
     return `<div class="digitem"><div class="dt">${cleanText(r.short_title)||"(untitled)"}</div>
-    <div class="dm">${r.agency_name} · due ${fdt(r.due_date)}${dl!=null?` (${dl} days)`:""}</div>${digContact(r)}</div>`; }
+    <div class="dm">${r.agency_name} · due ${fdt(r.due_date)}${dl!=null?` (${dl} days)`:""}</div>${dc}</div>`; }
   return `<div class="digitem"><div class="dt">${r.project_name||"(unnamed rezoning)"}</div>
     <div class="dm">${r.borough||""}${r.community_district? " · CD "+r.community_district:""} · ${r.public_status||""}${r.primary_applicant? " · "+r.primary_applicant:""}${mihOn(r.mih_flag)? " · affordable housing":""}</div>
     <div class="dc"><a href="https://zap.planning.nyc.gov/projects/${r.project_id}" target="_blank" rel="noopener">↗ View &amp; comment on ZAP</a> · <a href="https://a856-cityrecord.nyc.gov/Search/Advanced" target="_blank" rel="noopener">hearing notice in City Record</a></div></div>`;
