@@ -497,16 +497,14 @@
 <footer>
   <div class="wrap">
     <p style="margin:0 0 10px"><label style="cursor:pointer"><input type="checkbox" id="fastmode"> ⚡ Fast mode — search only editions on or after <b><span id="fastcut">…</span></b> <span class="muted">(saved on this device)</span></label></p>
-    <p style="margin:0 0 10px">The dateline marks the latest edition. CROL-List searches the City Record Open Data — <b><span id="editionspan">2003 to present</span></b>, 1M+ notices — not a single issue. <span class="muted">(The paper itself has run since 1873.)</span></p>
-    <p style="margin:0 0 10px"><b>CROL-List is an independent, unofficial project</b> — not affiliated with or endorsed by the City of New York. The masthead is an homage to <i>The City Record</i>; the emblem is original, not the City's official seal.</p>
-    <p>Sources:
+    <p style="margin:0 0 10px">The dateline marks the latest edition. CROL-List searches the City Record Open Data — <b><span id="editionspan">2003 to present</span></b>, 1M+ notices</p>
+    <p>Live fetches from:
       <a href="https://data.cityofnewyork.us/City-Government/City-Record-Online/dg92-zbpx" target="_blank" rel="noopener">City Record Online (dg92-zbpx)</a> ·
       <a href="https://data.cityofnewyork.us/City-Government/Citywide-Payroll-Data-Fiscal-Year-/k397-673e" target="_blank" rel="noopener">Citywide Payroll (k397-673e)</a> ·
       <a href="https://data.cityofnewyork.us/resource/vx8i-nprf" target="_blank" rel="noopener">Civil Service List (vx8i-nprf)</a> ·
       <a href="https://data.cityofnewyork.us/City-Government/Zoning-Application-Portal-ZAP-Project-Data/hgx4-8ukb" target="_blank" rel="noopener">ZAP Projects (hgx4-8ukb)</a> ·
       <a href="https://a0333-passportpublic.nyc.gov/" target="_blank" rel="noopener">PASSPort</a> ·
-      <a href="https://www.checkbooknyc.com/" target="_blank" rel="noopener">Checkbook NYC</a>.
-      Data fetched live. <span id="stamp"></span></p>
+      <a href="https://www.checkbooknyc.com/" target="_blank" rel="noopener">Checkbook NYC</a>.</p>
   </div>
 </footer>
 
@@ -1331,7 +1329,6 @@ $("#lgo").addEventListener("click", landSearch);
 $("#lkw").addEventListener("keydown", e=>{ if(e.key==="Enter") landSearch(); });
 ["#lboro","#lstatus"].forEach(s=>$(s).addEventListener("change", landSearch));
 
-$("#stamp").textContent = "Page loaded " + new Date().toISOString().slice(0,10) + ".";
 (function(){
   const map=[[1000,"M"],[900,"CM"],[500,"D"],[400,"CD"],[100,"C"],[90,"XC"],[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];
   const rom=n=>{let s="";for(const[v,r]of map){while(n>=v){s+=r;n-=v;}}return s;};
