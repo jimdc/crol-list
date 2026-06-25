@@ -999,11 +999,13 @@ async function landSelect(i, el){
   html+=`<div class="actions" style="margin-top:12px">
     <a class="act primary" href="https://zap.planning.nyc.gov/projects/${r.project_id}" target="_blank" rel="noopener">↗ Full project on ZAP</a>
     <button class="act" type="button" id="landalert" data-q="${area.replace(/"/g,'')}">🔔 Alert me about this area</button>
-    <a class="act" href="https://a856-cityrecord.nyc.gov/Search/Advanced" target="_blank" rel="noopener">Find in City Record</a>
+    <a class="act" id="crfind" href="https://a856-cityrecord.nyc.gov/Search/Advanced" target="_blank" rel="noopener">Search the City Record</a>
   </div>
   <div id="landmap"></div><div class="note" id="landmapnote"><span class="loading"></span> locating…</div>`;
   $("#ldetail").innerHTML=html;
   const la=$("#landalert"); if(la) la.addEventListener("click",()=>landToAlert(la.dataset.q));
+  const ulurp=(r.ulurp_numbers||"").match(/\d{6}/);
+  if(ulurp){ soda({"$select":"request_id","$where":"section_name='Public Hearings and Meetings'","$q":ulurp[0],"$order":"start_date DESC","$limit":"1"}).then(rows=>{ const cr=$("#crfind"); if(cr&&rows&&rows[0]){ cr.href=REQ_URL(rows[0].request_id); cr.textContent="↗ This rezoning's notice in the City Record"; } }).catch(()=>{}); }
   const q=(r.project_name||"").replace(/rezoning|special (mixed use )?district|text amendment|\bnos?\.?\b/ig," ").replace(/\s+/g," ").trim();
   const geo = q ? await geocode(q+" "+(r.borough||"")+" New York") : null;
   if(geo) landShowMap(geo.lat,geo.lon,geo.label);
