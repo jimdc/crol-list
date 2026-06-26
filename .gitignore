@@ -1,2 +1,6 @@
-node-modules/
+node_modules/
 .DS_Store
+
+# internal planning — keep private, never on the public repo
+internal/
+*.local.md
