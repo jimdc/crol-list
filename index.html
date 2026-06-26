@@ -34,17 +34,9 @@
   .cr-rule--top{border-top:3px solid var(--ink)}
   .cr-rule--mid{border-top:1px solid var(--rule-strong);margin-top:3px}
   .cr-rule--bottom{border-top:3px double var(--ink);margin-top:8px}
-  .nameplate{padding:9px 0 5px;cursor:help;position:relative}
-  .nameplate .cr-tip{position:absolute;left:50%;top:100%;transform:translateX(-50%) translateY(10px);width:min(430px,86vw);white-space:normal;font:italic 13px/1.5 var(--font-caslon);background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:9px;box-shadow:var(--shadow);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease,transform .15s ease;z-index:30}
-  .nameplate .cr-tip b{color:#fff}
-  .nameplate .cr-tip::before{content:"";position:absolute;left:50%;bottom:100%;transform:translateX(-50%);border:7px solid transparent;border-bottom-color:var(--ink)}
-  .nameplate:hover .cr-tip,.nameplate:focus-within .cr-tip{opacity:1;visibility:visible;transform:translateX(-50%) translateY(6px)}
+  .nameplate{padding:9px 0 5px}
   .cr-seal{width:44px;height:44px;color:var(--ink);display:block;margin:0 auto 3px}
   .cr-title{font-family:var(--font-nameplate);font-weight:900;font-size:clamp(2.5rem,8vw,4.8rem);line-height:.9;letter-spacing:.01em;text-transform:uppercase;color:var(--ink);margin:.04em 0 .1em}
-  .cr-sub{font-family:var(--font-sc);font-weight:600;letter-spacing:.2em;text-transform:uppercase;font-size:clamp(.64rem,1.5vw,.78rem);color:var(--ink-soft);margin:0}
-  .cr-dateline{font-family:var(--font-sc);text-transform:uppercase;letter-spacing:.12em;font-size:12px;color:var(--muted);display:flex;gap:.55rem;justify-content:center;flex-wrap:wrap;margin:9px 0}
-  .cr-dateline time{font-family:var(--font-caslon);font-style:italic;text-transform:none;letter-spacing:.01em}
-  .cr-dot{color:var(--rule-strong)}
   .tabs{display:flex;gap:.2rem;justify-content:center;flex-wrap:wrap;margin-top:4px}
   .tabbtn{font-family:var(--font-sc);font-weight:600;font-size:13px;letter-spacing:.15em;text-transform:uppercase;padding:9px 18px;border:0;background:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
   .tabbtn.active{color:var(--oxblood);border-bottom-color:var(--oxblood)}
@@ -232,7 +224,7 @@
 <header class="masthead">
   <div class="wrap">
     <div class="cr-rule cr-rule--top"></div>
-    <div class="nameplate" tabindex="0" role="note" aria-label="Built on The City Record — Official Journal of the City of New York, published every business day since 1873">
+    <div class="nameplate">
       <svg class="cr-seal" viewBox="0 0 100 100" aria-hidden="true">
         <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="1.5"/>
         <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="0.6"/>
@@ -241,11 +233,8 @@
         <path d="M50 30 L50 46 M42 38 L58 38" stroke="currentColor" stroke-width="1.1"/>
       </svg>
       <h1 class="cr-title">CROL-List</h1>
-      <p class="cr-sub">Official Journal of the City of New York &middot; Decoded</p>
-      <span class="cr-tip">Built on <b>The City Record</b> — the Official Journal of the City of New York, published every business day since 1873.</span>
     </div>
     <div class="cr-rule cr-rule--mid"></div>
-    <p class="cr-dateline" id="dateline"></p>
     <nav class="tabs">
       <button class="tabbtn active" data-tab="money">Money</button>
       <button class="tabbtn" data-tab="people">People</button>
@@ -505,7 +494,7 @@
 
 <footer>
   <div class="wrap">
-    <p style="margin:0 0 10px">The dateline marks the latest edition. CROL-List searches the City Record Open Data — <b><span id="editionspan">2003 to present</span></b>, 1M+ notices</p>
+    <p style="margin:0 0 10px">CROL-List searches the City Record Open Data — <b><span id="editionspan">2003 to present</span></b>, 1M+ notices</p>
     <p>Live fetches from:
       <a href="https://data.cityofnewyork.us/City-Government/City-Record-Online/dg92-zbpx" target="_blank" rel="noopener">City Record Online (dg92-zbpx)</a> ·
       <a href="https://data.cityofnewyork.us/City-Government/Citywide-Payroll-Data-Fiscal-Year-/k397-673e" target="_blank" rel="noopener">Citywide Payroll (k397-673e)</a> ·
@@ -1368,15 +1357,6 @@ $("#lgo").addEventListener("click", landSearch);
 $("#lkw").addEventListener("keydown", e=>{ if(e.key==="Enter") landSearch(); });
 ["#lboro","#lstatus"].forEach(s=>$(s).addEventListener("change", landSearch));
 
-(function(){
-  const map=[[1000,"M"],[900,"CM"],[500,"D"],[400,"CD"],[100,"C"],[90,"XC"],[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];
-  const rom=n=>{let s="";for(const[v,r]of map){while(n>=v){s+=r;n-=v;}}return s;};
-  const now=new Date(); let n=0,d=new Date(now.getFullYear(),0,1);
-  while(d<=now){const wd=d.getDay();if(wd!==0&&wd!==6)n++;d.setDate(d.getDate()+1);}
-  const fmt=now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
-  const el=$("#dateline");
-  if(el) el.innerHTML=`<span>Vol.&nbsp;${rom(now.getFullYear()-1873)}</span><span class="cr-dot">&middot;</span><span>No.&nbsp;${n}</span><span class="cr-dot">&middot;</span><span>New&nbsp;York, <time datetime="${now.toISOString().slice(0,10)}">${fmt}</time></span>`;
-})();
 ["property","rules","meetings"].forEach(k=>{
   $("#"+k+"go").addEventListener("click",()=>loadSection(k));
   $("#"+k+"kw").addEventListener("keydown",e=>{ if(e.key==="Enter") loadSection(k); });
