@@ -34,7 +34,11 @@
   .cr-rule--top{border-top:3px solid var(--ink)}
   .cr-rule--mid{border-top:1px solid var(--rule-strong);margin-top:3px}
   .cr-rule--bottom{border-top:3px double var(--ink);margin-top:8px}
-  .nameplate{padding:9px 0 5px;cursor:help}
+  .nameplate{padding:9px 0 5px;cursor:help;position:relative}
+  .nameplate .cr-tip{position:absolute;left:50%;top:100%;transform:translateX(-50%) translateY(10px);width:min(430px,86vw);white-space:normal;font:italic 13px/1.5 var(--font-caslon);background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:9px;box-shadow:var(--shadow);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease,transform .15s ease;z-index:30}
+  .nameplate .cr-tip b{color:#fff}
+  .nameplate .cr-tip::before{content:"";position:absolute;left:50%;bottom:100%;transform:translateX(-50%);border:7px solid transparent;border-bottom-color:var(--ink)}
+  .nameplate:hover .cr-tip,.nameplate:focus-within .cr-tip{opacity:1;visibility:visible;transform:translateX(-50%) translateY(6px)}
   .cr-seal{width:44px;height:44px;color:var(--ink);display:block;margin:0 auto 3px}
   .cr-title{font-family:var(--font-nameplate);font-weight:900;font-size:clamp(2.5rem,8vw,4.8rem);line-height:.9;letter-spacing:.01em;text-transform:uppercase;color:var(--ink);margin:.04em 0 .1em}
   .cr-sub{font-family:var(--font-sc);font-weight:600;letter-spacing:.2em;text-transform:uppercase;font-size:clamp(.64rem,1.5vw,.78rem);color:var(--ink-soft);margin:0}
@@ -182,6 +186,10 @@
   .fcard .factions{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto;padding-top:4px}
   .fcard .factions .act{padding:7px 11px;font-size:12.5px}
   .fcard .demoresult{cursor:default;border-style:dashed;white-space:normal}
+  .chiprow{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+  .chip{font-family:var(--font-sc);font-weight:600;font-size:12px;letter-spacing:.04em;padding:7px 12px;border:1px solid var(--rule);border-radius:999px;background:#fff;color:var(--ink-soft);cursor:pointer}
+  .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .chip .ct{opacity:.55;font-weight:400;margin-left:5px}
 
   /* alerts */
   .afield{margin-bottom:14px}
@@ -224,7 +232,7 @@
 <header class="masthead">
   <div class="wrap">
     <div class="cr-rule cr-rule--top"></div>
-    <div class="nameplate" title="Built on The City Record — Official Journal of the City of New York, published every business day since 1873">
+    <div class="nameplate" tabindex="0" role="note" aria-label="Built on The City Record — Official Journal of the City of New York, published every business day since 1873">
       <svg class="cr-seal" viewBox="0 0 100 100" aria-hidden="true">
         <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="1.5"/>
         <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="0.6"/>
@@ -234,6 +242,7 @@
       </svg>
       <h1 class="cr-title">CROL-List</h1>
       <p class="cr-sub">Official Journal of the City of New York &middot; Decoded</p>
+      <span class="cr-tip">Built on <b>The City Record</b> — the Official Journal of the City of New York, published every business day since 1873.</span>
     </div>
     <div class="cr-rule cr-rule--mid"></div>
     <p class="cr-dateline" id="dateline"></p>
@@ -496,7 +505,6 @@
 
 <footer>
   <div class="wrap">
-    <p style="margin:0 0 10px"><label style="cursor:pointer"><input type="checkbox" id="fastmode"> ⚡ Fast mode — search only editions on or after <b><span id="fastcut">…</span></b> <span class="muted">(saved on this device)</span></label></p>
     <p style="margin:0 0 10px">The dateline marks the latest edition. CROL-List searches the City Record Open Data — <b><span id="editionspan">2003 to present</span></b>, 1M+ notices</p>
     <p>Live fetches from:
       <a href="https://data.cityofnewyork.us/City-Government/City-Record-Online/dg92-zbpx" target="_blank" rel="noopener">City Record Online (dg92-zbpx)</a> ·
@@ -513,6 +521,11 @@ const SODA = "https://data.cityofnewyork.us/resource/dg92-zbpx.json";
 const PAY  = "https://data.cityofnewyork.us/resource/k397-673e.json";
 const CSL  = "https://data.cityofnewyork.us/resource/vx8i-nprf.json";
 const PAYFY = "2025";
+// Optional backend (crol-worker on Netlify). Empty = fully client-side: the NL box uses the
+// on-device heuristic, Checkbook $-paid stays hidden, alerts are preview-only. Set to the
+// deployed worker URL (e.g. "https://crol-worker.netlify.app") to light up the model-backed
+// features; every one of them falls back to the static behavior if the worker is unreachable.
+const API = "";
 const REQ_URL = id => `https://a856-cityrecord.nyc.gov/RequestDetail/${encodeURIComponent(id)}`;
 const PASSPORT = "https://a0333-passportpublic.nyc.gov/";
 const STAGE_RANK = {"Solicitation":0,"Intent to Negotiate":1,"Vendor List":2,"Intent to Award":3,"Award":4};
@@ -521,14 +534,21 @@ const SELECT = "request_id,start_date,agency_name,type_of_notice_description,cat
 
 const $ = s => document.querySelector(s);
 const todayISO = () => new Date().toISOString().slice(0,10) + "T00:00:00";
-const fastOn = () => { try{ return localStorage.getItem("crol_fast")==="1"; }catch(e){ return false; } };
+// If a full-history query runs past SLOW_MS, automatically retry within this recent window.
+const RECENT_DAYS = 730, SLOW_MS = 7000;
+const recentCut = () => new Date(Date.now()-RECENT_DAYS*86400000).toISOString().slice(0,10) + "T00:00:00";
+const recentCutLabel = () => new Date(Date.now()-RECENT_DAYS*86400000).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
 
-async function api(base, params){
-  const r = await fetch(base + "?" + new URLSearchParams(params).toString());
-  if(!r.ok) throw new Error("API " + r.status);
-  return r.json();
+async function api(base, params, timeoutMs){
+  const ctl = timeoutMs ? new AbortController() : null;
+  const t = ctl ? setTimeout(()=>ctl.abort(), timeoutMs) : null;
+  try{
+    const r = await fetch(base + "?" + new URLSearchParams(params).toString(), ctl ? {signal:ctl.signal} : undefined);
+    if(!r.ok) throw new Error("API " + r.status);
+    return await r.json();
+  } finally { if(t) clearTimeout(t); }
 }
-const soda = params => api(SODA, params);
+const soda = (params, timeoutMs) => api(SODA, params, timeoutMs);
 
 function usablePin(p){
   if(!p) return false;
@@ -591,7 +611,6 @@ async function search(){
   if(mode === "open") where += ` AND due_date > '${todayISO()}'`;
   if(agency) where += ` AND agency_name='${agency.replace(/'/g,"''")}'`;
   if(mode === "award" && minamt) where += ` AND contract_amount >= ${minamt} AND contract_amount < 5000000000`;
-  if(fastOn()) where += " AND start_date > '" + new Date(Date.now()-730*86400000).toISOString().slice(0,10) + "T00:00:00'";
 
   let order;
   if(sort === "amount") order = "contract_amount DESC";
@@ -604,11 +623,21 @@ async function search(){
   $("#list").innerHTML = '<div class="empty"><span class="loading"></span> searching…</div>';
   const p = {"$select":SELECT,"$where":where,"$order":order,"$limit":"40"};
   if(kw) p["$q"] = kw;
+  let narrowed = false;
   try{
-    currentRows = await soda(p);
-    $("#rescount").textContent = currentRows.length === 40 ? "40+" : currentRows.length;
-    renderList();
-  }catch(e){ $("#list").innerHTML = '<div class="empty">Could not reach NYC Open Data. Retry in a moment.</div>'; }
+    try{
+      currentRows = await soda(p, SLOW_MS);
+    }catch(err){
+      if(err.name !== "AbortError") throw err;
+      // Full-history search ran past SLOW_MS — fall back to recent editions only.
+      narrowed = true;
+      currentRows = await soda({...p, "$where": where + " AND start_date > '" + recentCut() + "'"}, SLOW_MS + 4000);
+    }
+  }catch(e){ $("#list").innerHTML = '<div class="empty">Could not reach NYC Open Data. Retry in a moment.</div>'; return; }
+  $("#rescount").textContent = currentRows.length === 40 ? "40+" : currentRows.length;
+  renderList();
+  if(narrowed) $("#list").insertAdjacentHTML("afterbegin",
+    `<div class="note warn" style="margin:10px 12px 0">Full-history search was slow — showing <b>recent editions only</b> (since ${recentCutLabel()}). Add an agency or keyword to search all years faster.</div>`);
 }
 
 function renderList(){
@@ -780,11 +809,22 @@ function parseNL(text){
   out.keywords=[...new Set(out.keywords)].slice(0,4);
   return out;
 }
-function nlTranslate(){
+async function nlResolve(text){
+  // Prefer the model-backed worker when API is set; fall back to the on-device heuristic.
+  if(API){
+    try{
+      const r=await fetch(API.replace(/\/+$/,"")+"/nl",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text})});
+      if(r.ok){const j=await r.json(); if(j&&j.filter&&!j.degraded) return {source:"model",...j.filter};}
+    }catch(e){}
+  }
+  return {source:"device",...parseNL(text)};
+}
+async function nlTranslate(){
   const text=$("#nlq").value.trim(); if(!text) return;
-  const p=parseNL(text);
+  const p=await nlResolve(text);
   const chips=[`<span class="qchip">notice = <b>open RFP</b></span>`];
   if(p.keywords.length) chips.push(`<span class="qchip">about <b>${p.keywords.join(" / ")}</b></span>`);
+  if(p.agency) chips.push(`<span class="qchip">agency <b>${p.agency}</b></span>`);
   if(p.minAmount) chips.push(`<span class="qchip">value ≥ <b>${money(p.minAmount)}</b></span>`);
   if(p.months) chips.push(`<span class="qchip">due within <b>${p.months} mo</b></span>`);
   if(p.excludeSpecial) chips.push(`<span class="qchip"><b>standard</b> · no special case</span>`);
@@ -793,7 +833,8 @@ function nlTranslate(){
   const code=["type_of_notice = 'Solicitation'","due_date > today"+(dueMax?` AND due_date <= '${dueMax}'`:""),
     `$q ~ ${kwExpr}`, p.minAmount?`contract_amount >= ${p.minAmount}`:null,
     p.excludeSpecial?`selection_method NOT LIKE '%Special%'`:null].filter(Boolean).join("\nAND ");
-  $("#nltrans").innerHTML=`<div style="margin:10px 0 2px">${chips.join("")}</div><div class="qcode">${code}</div>`;
+  const tag=p.source==="model"?`<span class="qchip" style="opacity:.65">decoded by Claude Haiku</span>`:`<span class="qchip" style="opacity:.65">on-device</span>`;
+  $("#nltrans").innerHTML=`<div style="margin:10px 0 2px">${chips.join("")}${tag}</div><div class="qcode">${code}</div>`;
   $("#mode").value="open"; $("#sort").value="deadline"; $("#kw").value=p.keywords.join(" ");
   search();
 }
@@ -1301,8 +1342,6 @@ $("#go").addEventListener("click", search);
 $("#nlgo").addEventListener("click", nlTranslate);
 $("#nlq").addEventListener("keydown", e=>{ if(e.key==="Enter") nlTranslate(); });
 $("#export").addEventListener("click", exportCSV);
-const _fm=$("#fastmode"); if(_fm){ _fm.checked=fastOn(); _fm.addEventListener("change",()=>{ try{localStorage.setItem("crol_fast", _fm.checked?"1":"0");}catch(e){} search(); }); }
-{ const fc=$("#fastcut"); if(fc) fc.textContent=new Date(Date.now()-730*86400000).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}); }
 soda({"$select":"min(start_date) as a, max(start_date) as b"}).then(r=>{ const el=$("#editionspan"); if(el&&r&&r[0]){ const f=s=>new Date(s).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}); el.textContent=f(r[0].a)+" – "+f(r[0].b); } }).catch(()=>{});
 $("#kw").addEventListener("keydown", e=>{ if(e.key==="Enter") search(); });
 ["#mode","#agency","#sort","#minamt"].forEach(s=>$(s).addEventListener("change", search));

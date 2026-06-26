@@ -8,16 +8,24 @@ hearings, and rezonings there. It's the city's daily newspaper of government, an
 read it: a dense stream of disconnected legal notices. **CROL-List** re-links those notices into
 something a person can actually follow.
 
-**Live (no login):** https://crol-list.jimdc.com  ·  also at https://jimdc.github.io/crol-list/
+**Live (no login):** https://jimdc.github.io/crol-list/
 
-> Custom domain `crol-list.jimdc.com` (Cloudflare CNAME → GitHub Pages). The repo was renamed to
-> `crol-list`; the old `…/city-record-money-map/` link auto-redirects, so prior links keep working.
+## What it does — seven lenses
 
-## What it does — four lenses
+**Three deep lenses** re-stitch a single thread and decode it:
 
 - **💵 Money** — follow a contract from **RFP → Intent to Award → Award ($)**, stitched by PIN, with how-to-respond (deadline, contact, PASSPort), filters, and CSV export. Plus a plain-English ("ask in English") search.
 - **👤 People** — decode any city job: official civil-service title, **competitive (exam) vs non-competitive**, salary band, and a career ladder. Or look up a person → appointment history + payroll.
-- **🏗 Land** — rezonings in plain English, cross-referenced to **ZAP** (applicant, what's being built, affordable housing, status) and pinned on a map.
+- **🏗 Land** — rezonings in plain English, cross-referenced to **ZAP** (applicant, what's being built, affordable housing, status) and drawn as the real rezoned tax-lot polygons on a map.
+
+**Three feed lenses** sweep the rest of the daily record — filter by agency or keyword, then add the date to your calendar (`.ics`):
+
+- **🏛 Property** — city property being **sold, auctioned, or disposed** (NYPD auctions, HPD sales, DEP land): what's on the block, the sale date, and where. Each address gets a one-tap **"Still standing?"** check against DOB demolition filings.
+- **📋 Rules** — **rules that are changing**: proposed & adopted agency regulations, by agency, with the public-comment **hearing date**.
+- **🗓 Meetings** — **public meetings**: Community Boards, City Council, Landmarks, Board of Standards & Appeals, and more.
+
+**And one to keep it coming:**
+
 - **🔔 Alerts** — subscribe to a slice (e.g. "rezonings near 79 Rivington," "awards over $1M") and preview the email/SMS digest, with one-tap **✍ Respond** / **✉** / **☎** built from the notice's own data.
 
 ## Architecture — client-side, live data, no backend
@@ -36,7 +44,9 @@ City publishes it (the City Record updates each business day). The browser calls
  │                            • Citywide Payroll  k397-673e          │
  │                            • Civil Service List  vx8i-nprf        │
  │                            • ZAP projects  hgx4-8ukb              │
+ │                            • DOB filings  w9ak-ipjd / ic3t-wcy2   │
  │              ──fetch()──►  Planning Labs GeoSearch (geocoding)    │
+ │              ──query───►  MapPLUTO (ArcGIS) tax-lot polygons      │
  │              ──tiles───►  Leaflet + CARTO basemap                 │
  └──────────────────────────────────────────────────────────────────┘
 ```
@@ -53,11 +63,13 @@ The **only** data committed to the repo is two small *precomputed snapshots*, us
 
 | Source | ID / endpoint | Used by |
 |---|---|---|
-| City Record Online | `dg92-zbpx` (Socrata) | Money, People, Alerts |
+| City Record Online | `dg92-zbpx` (Socrata) | Money · People · Property · Rules · Meetings · Alerts |
 | Citywide Payroll | `k397-673e` | People |
 | Civil Service List | `vx8i-nprf` | People (exam status) |
 | ZAP Projects | `hgx4-8ukb` | Land, Alerts |
-| Planning Labs GeoSearch | `geosearch.planninglabs.nyc` | Land (geocoding) |
+| Planning Labs GeoSearch | `geosearch.planninglabs.nyc` | Land, Property (geocoding) |
+| MapPLUTO (ArcGIS) | `services5.arcgis.com/…/MAPPLUTO` | Land (tax-lot polygons) |
+| DOB job filings | `w9ak-ipjd`, `ic3t-wcy2` | Property ("Still standing?") |
 | Checkbook NYC | `checkbooknyc.com/api` | *(roadmap — actual $ paid)* |
 
 ## Real vs. mock
