@@ -136,7 +136,7 @@ const STRINGS = {
     all_agencies_loading: "All agencies — loading…",
     // Tab labels
     tab_money:    "Contracts",
-    tab_people:   "People",
+    tab_people:   "Staffing",
     tab_land:     "Land",
     tab_property: "Property",
     tab_rules:    "Rules",

@@ -40,7 +40,7 @@
     sugg_alerts_2: "chanjman zonaj toupre 79 Rivington",
     all_agencies_loading: "Tout ajans — ap chaje…",
     tab_money: "Kontra",
-    tab_people: "Moun",
+    tab_people: "Pèsonèl",
     tab_land: "Tè",
     tab_property: "Pwopriyete",
     tab_rules: "Règleman",

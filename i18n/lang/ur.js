@@ -43,7 +43,7 @@
     sugg_alerts_2: "79 Rivington کے قریب دوبارہ زوننگ",
     all_agencies_loading: "تمام ادارے — لوڈ ہو رہا ہے…",
     tab_money: "ٹھیکے",
-    tab_people: "افراد",
+    tab_people: "عملہ",
     tab_land: "زمین",
     tab_property: "جائیداد",
     tab_rules: "قواعد",

@@ -46,7 +46,7 @@
     all_agencies_loading: "Toutes les agences — chargement…",
     // Tab labels
     tab_money:    "Contrats",
-    tab_people:   "Personnes",
+    tab_people:   "Effectifs",
     tab_land:     "Terrains",
     tab_property: "Biens",
     tab_rules:    "Règles",

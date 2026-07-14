@@ -41,7 +41,7 @@
     sugg_alerts_2: "rezonificaciones cerca de 79 Rivington",
     all_agencies_loading: "Todas las agencias — cargando…",
     tab_money: "Contratos",
-    tab_people: "Personas",
+    tab_people: "Personal",
     tab_land: "Terrenos",
     tab_property: "Propiedades",
     tab_rules: "Reglas",

@@ -49,7 +49,7 @@
     sugg_alerts_2: "zmiany stref w pobliżu 79 Rivington",
     all_agencies_loading: "Wszystkie agencje — wczytywanie…",
     tab_money: "Kontrakty",
-    tab_people: "Ludzie",
+    tab_people: "Kadry",
     tab_land: "Grunty",
     tab_property: "Nieruchomości",
     tab_rules: "Przepisy",

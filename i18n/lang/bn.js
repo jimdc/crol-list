@@ -41,7 +41,7 @@
     sugg_alerts_2: "79 Rivington-এর কাছে অঞ্চল পুনর্বিন্যাস",
     all_agencies_loading: "সব সংস্থা — লোড হচ্ছে…",
     tab_money: "চুক্তি",
-    tab_people: "মানুষ",
+    tab_people: "জনবল",
     tab_land: "জমি",
     tab_property: "সম্পত্তি",
     tab_rules: "বিধি",

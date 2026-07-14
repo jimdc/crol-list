@@ -43,7 +43,7 @@
     sugg_alerts_2: "إعادة تقسيم المناطق قرب 79 Rivington",
     all_agencies_loading: "كل الجهات — جارٍ التحميل…",
     tab_money: "العقود",
-    tab_people: "الأشخاص",
+    tab_people: "التوظيف",
     tab_land: "الأراضي",
     tab_property: "العقارات",
     tab_rules: "القواعد",

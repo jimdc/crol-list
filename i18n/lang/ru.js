@@ -41,7 +41,7 @@
     sugg_alerts_2: "изменения зонирования рядом с 79 Rivington",
     all_agencies_loading: "Все ведомства — загрузка…",
     tab_money: "Контракты",
-    tab_people: "Люди",
+    tab_people: "Кадры",
     tab_land: "Земля",
     tab_property: "Недвижимость",
     tab_rules: "Правила",
