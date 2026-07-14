@@ -77,16 +77,16 @@ const SHIPPING_LANGS = ["es", "zh-Hans", "ru", "bn", "ht", "ko", "fr", "pl", "ar
 // a Polish fix never invalidates nine other dictionaries' cache entries.
 // Regenerate with: shasum -a 256 i18n/lang/<lang>.js | cut -c1-8
 const LANG_FILE_HASHES = {
-  es: "fb76ba4b",
-  "zh-Hans": "bffa3827",
-  ru: "906c9585",
-  bn: "dd778e5a",
-  ht: "acc22ffd",
-  ko: "b545f1c6",
-  fr: "081e0b70",
-  pl: "231be917",
-  ar: "52b02c8c",
-  ur: "ec5a3699",
+  es: "1b5f0fa2",
+  "zh-Hans": "994269cd",
+  ru: "0d2120af",
+  bn: "ae01cbeb",
+  ht: "cfc92cb0",
+  ko: "652d1c3f",
+  fr: "136f5a8e",
+  pl: "465101c9",
+  ar: "94eb1fec",
+  ur: "45737c45",
 };
 
 // Translation review-state (w8-02): drives the machine-translation disclosure banner
