@@ -9,7 +9,10 @@
 // The daily cron pre-warms freshly-ingested Award notices (bounded, NOT a full backfill); any
 // other notice is filled lazily on its first request. Fail-soft throughout, matching the other
 // worker modules: no D1 binding → skip the cache but still compute; a SODA hiccup → return empty
-// rather than throw, so a notice-detail view never breaks on a transient upstream error.
+// rather than throw, so a notice-detail view never breaks on a transient upstream error. A
+// failed or unresolvable compute is never cached — the next request recomputes (the client's
+// old retry-on-next-open behavior), and an id that resolves to no notice writes no D1 row at
+// all (read-only on miss, like /inv and /forecast).
 
 import {
   rankPriorCycleCandidates, rankNearMatchCandidates, priorCycleTitleWords,
@@ -55,18 +58,22 @@ export async function fetchNoticeRow(env, requestId) {
 }
 
 // Run the two live SODA queries (strict, then near) exactly as index.html did and rank both
-// tiers. Returns { strict, near }. Fail-soft: a query that errors contributes an empty tier
-// rather than throwing.
+// tiers. Returns { strict, near, ok }: ok is false when the notice couldn't be resolved or a
+// tier query errored, so callers know the (empty) result is not a confirmed answer and must
+// not cache it. Pass the already-resolved notice row (or null) as noticeRow to skip the
+// lookup here; only an omitted (undefined) noticeRow triggers a fetch. Fail-soft: a query
+// that errors contributes an empty tier rather than throwing.
 export async function computeMatches(env, requestId, noticeRow) {
-  const r = noticeRow || await fetchNoticeRow(env, requestId);
-  const empty = { strict: [], near: [] };
-  if (!r || !r.agency_name || !r.short_title) return empty;
+  const r = noticeRow === undefined ? await fetchNoticeRow(env, requestId) : noticeRow;
+  if (!r) return { strict: [], near: [], ok: false };
+  if (!r.agency_name || !r.short_title) return { strict: [], near: [], ok: true };
 
   const myWords = priorCycleTitleWords(r.short_title);
-  if (myWords.length < 2) return empty; // too generic a title to search on (matches index.html's guard)
+  if (myWords.length < 2) return { strict: [], near: [], ok: true }; // too generic a title to search on (matches index.html's guard)
 
   // --- strict tier (priorCycleAwards): agency + top-6-title-word $q, no date bound, limit 50 ---
   let strict = [];
+  let ok = true;
   const strictWords = myWords.slice(0, PRIOR_CYCLE_QUERY_WORDS);
   try {
     const rows = await soda({
@@ -77,7 +84,7 @@ export async function computeMatches(env, requestId, noticeRow) {
       "$limit": "50",
     });
     strict = rankPriorCycleCandidates(r, rows, {});
-  } catch { /* leave strict empty — same posture as the client's silent catch */ }
+  } catch { ok = false; /* leave strict empty — same posture as the client's silent catch */ }
 
   // --- near tier (nearMatchCandidates): agency + top-2-title-word $q + start_date < notice's,
   //     limit 50; excludes the strict matches it was handed ---
@@ -93,10 +100,10 @@ export async function computeMatches(env, requestId, noticeRow) {
         "$limit": "50",
       });
       near = rankNearMatchCandidates(r, rows, strict, {});
-    } catch { /* leave near empty */ }
+    } catch { ok = false; /* leave near empty */ }
   }
 
-  return { strict, near };
+  return { strict, near, ok };
 }
 
 async function cacheGet(env, requestId) {
@@ -123,15 +130,17 @@ async function cachePut(env, requestId, agency, matches) {
   } catch { /* a cache-write failure must never break the compute path */ }
 }
 
-// Read the D1 cache; on a miss, compute, upsert, and return. With no D1 binding it always
-// computes fresh (no cache layer). Fail-soft: never throws.
+// Read the D1 cache; on a miss, compute, upsert, and return. Only a fully-successful compute
+// for a resolvable notice is cached — a transient failure or an unknown id stays uncached so
+// the next request recomputes. With no D1 binding it always computes fresh (no cache layer).
+// Fail-soft: never throws.
 export async function getOrCompute(env, requestId) {
   const cached = await cacheGet(env, requestId);
   if (cached) return cached;
   const row = await fetchNoticeRow(env, requestId);
-  const matches = await computeMatches(env, requestId, row);
-  await cachePut(env, requestId, row && row.agency_name, matches);
-  return matches;
+  const { strict, near, ok } = await computeMatches(env, requestId, row);
+  if (ok) await cachePut(env, requestId, row && row.agency_name, { strict, near });
+  return { strict, near };
 }
 
 // Bounded batch pre-warm, used by the daily cron for freshly-ingested Award notices. Skips
@@ -144,8 +153,9 @@ export async function prewarm(env, requestIds) {
     try {
       if (await cacheGet(env, id)) { skipped++; continue; }
       const row = await fetchNoticeRow(env, id);
-      const matches = await computeMatches(env, id, row);
-      await cachePut(env, id, row && row.agency_name, matches);
+      const { strict, near, ok } = await computeMatches(env, id, row);
+      if (!ok) { failed++; continue; }
+      await cachePut(env, id, row && row.agency_name, { strict, near });
       computed++;
     } catch {
       failed++;
@@ -167,7 +177,12 @@ export async function handlePriorCycle(req, env, pathname) {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (req.method !== "GET") return json({ ok: false, reason: "method" }, 405, cors);
 
-  const rawId = decodeURIComponent(pathname.slice("/priorcycle/".length));
+  let rawId;
+  try {
+    rawId = decodeURIComponent(pathname.slice("/priorcycle/".length));
+  } catch {
+    return json({ ok: false, reason: "bad-id" }, 400, cors); // malformed percent-encoding
+  }
   // request_ids are digit strings (e.g. "20260625017"); accept a conservative alnum set only.
   if (!/^[A-Za-z0-9_-]{4,40}$/.test(rawId)) return json({ ok: false, reason: "bad-id" }, 400, cors);
 

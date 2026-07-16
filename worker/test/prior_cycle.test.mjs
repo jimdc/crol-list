@@ -1,7 +1,8 @@
 // Pins worker/src/prior_cycle.mjs — the SODA-query + D1-cache layer around the ported ranking
 // lib (lib/prior_cycle.mjs, tested separately in prior_cycle_lib.test.mjs). Verifies:
-//   - computeMatches runs the two queries the client did and returns { strict, near }
-//   - getOrCompute reads the D1 cache, computes + upserts on a miss, and reuses it on a hit
+//   - computeMatches runs the two queries the client did and returns { strict, near, ok }
+//   - getOrCompute reads the D1 cache, computes + upserts on a miss, and reuses it on a hit;
+//     a failed compute or an unresolvable id is returned but never cached
 //   - prewarm is bounded, idempotent (skips already-cached), and fail-soft per notice
 //   - GET /priorcycle/<id> returns { id, strict, near } with the edge-cache header and
 //     validates/sanitizes the id
@@ -108,11 +109,11 @@ test("computeMatches: too-generic a title short-circuits without a SODA call", w
   const matches = await computeMatches(env, "X", {
     request_id: "X", agency_name: "Sanitation", short_title: "the of and", start_date: "2024-01-01",
   });
-  assert.deepEqual(matches, { strict: [], near: [] });
+  assert.deepEqual(matches, { strict: [], near: [], ok: true });
   assert.equal(calls.length, 0, "no query for a title with < 2 significant words");
 }));
 
-test("computeMatches: a SODA failure is fail-soft (empty tier, never throws)", async () => {
+test("computeMatches: a SODA failure is fail-soft (empty tier, ok:false, never throws)", async () => {
   const orig = globalThis.fetch;
   globalThis.fetch = async () => ({ ok: false, status: 503, json: async () => [] });
   try {
@@ -120,7 +121,7 @@ test("computeMatches: a SODA failure is fail-soft (empty tier, never throws)", a
       request_id: hpdNotice.request_id, start_date: hpdNotice.start_date,
       agency_name: hpdNotice.agency, short_title: hpdNotice.short_title, pin: hpdNotice.pin,
     });
-    assert.deepEqual(matches, { strict: [], near: [] });
+    assert.deepEqual(matches, { strict: [], near: [], ok: false });
   } finally { globalThis.fetch = orig; }
 });
 
@@ -148,6 +149,30 @@ test("getOrCompute: cache miss computes, upserts, and the next read is a hit", w
   assert.equal(stored.near[0].c.request_id, "20190621041");
   assert.equal(db._cache["20220314107"].agency, "Housing Preservation and Development");
 }, { strictRows: [], nearRows: [hpdPriorRound] }));
+
+test("getOrCompute: a transient SODA failure is returned but NOT cached (retry-on-next-request)", async () => {
+  const orig = globalThis.fetch;
+  globalThis.fetch = async () => ({ ok: false, status: 503, json: async () => [] });
+  try {
+    const db = fakeDB({ notices: { "20220314107": hpdNotice } });
+    const matches = await getOrCompute({ DB: db }, "20220314107");
+    assert.deepEqual(matches, { strict: [], near: [] });
+    assert.equal(db._cache["20220314107"], undefined, "a failed compute must not be cached");
+  } finally { globalThis.fetch = orig; }
+});
+
+test("getOrCompute: an id that resolves to no notice writes no cache row and looks it up once", async () => {
+  const orig = globalThis.fetch;
+  let lookups = 0;
+  globalThis.fetch = async () => { lookups++; return { ok: true, status: 200, json: async () => [] }; };
+  try {
+    const db = fakeDB();
+    const matches = await getOrCompute({ DB: db }, "NOPE1234");
+    assert.deepEqual(matches, { strict: [], near: [] });
+    assert.equal(db._cache["NOPE1234"], undefined, "an unresolvable id must not grow the table");
+    assert.equal(lookups, 1, "the notice row is resolved once, not re-fetched by computeMatches");
+  } finally { globalThis.fetch = orig; }
+});
 
 test("getOrCompute: with no D1 binding it still computes (no cache layer)", withMockedSoda(async () => {
   const env = {}; // no DB — fetchNoticeRow falls to SODA; strict $where=request_id lookup
@@ -195,6 +220,15 @@ test("GET /priorcycle/<id>: rejects a malformed id", async () => {
   const env = { DB: fakeDB() };
   const req = new Request("https://w/priorcycle/..%2Fetc", { method: "GET" });
   const res = await handlePriorCycle(req, env, "/priorcycle/..%2Fetc");
+  assert.equal(res.status, 400);
+  const body = await res.json();
+  assert.equal(body.reason, "bad-id");
+});
+
+test("GET /priorcycle/<id>: malformed percent-encoding returns 400, not a 500", async () => {
+  const env = { DB: fakeDB() };
+  const req = new Request("https://w/priorcycle/%", { method: "GET" });
+  const res = await handlePriorCycle(req, env, "/priorcycle/%");
   assert.equal(res.status, 400);
   const body = await res.json();
   assert.equal(body.reason, "bad-id");
