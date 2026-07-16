@@ -1510,11 +1510,16 @@ async function loadAuthorityAwards(agency){
 function authorityAwardsHTML(agency, awards){
   const source = authorityAwardSource(agency);
   if(!source || !awards.length) return "";
-  const rows = awards.map(a=>`<div class="tl">
+  const rows = awards.map(a=>{
+    const vendor = a.vendor ? `<b lang="en" dir="ltr">${escUiHtml(a.vendor)}</b>` : `<b>${t("untitled_name")}</b>`;
+    const description = a.description ? `<span lang="en" dir="ltr"> — ${escUiHtml(a.description)}</span>` : "";
+    const meta = [money(a.amount), a.process ? `<span lang="en" dir="ltr">${escUiHtml(a.process)}</span>` : ""].filter(Boolean).join(" · ");
+    return `<div class="tl">
       <span class="tldate">${fdate(a.date)||"—"}</span>
-      <span class="tlreason" lang="en" dir="ltr"><b>${escUiHtml(a.vendor)||t("untitled_name")}</b>${a.description?` — ${escUiHtml(a.description)}`:""}</span>
-      <span class="rmeta" lang="en" dir="ltr" style="margin:0">${[money(a.amount),escUiHtml(a.process)].filter(Boolean).join(" · ")}</span>
-    </div>`).join("");
+      <span class="tlreason">${vendor}${description}</span>
+      <span class="rmeta" style="margin:0">${meta}</span>
+    </div>`;
+  }).join("");
   return `<div id="external-awards-content"><div class="chain-h">${t("external_awards_heading")}</div>
     <div class="timeline">${rows}</div>
     <div class="pnote">${t("external_awards_abo_note")} <a href="https://data.ny.gov/resource/${source.dataset}" ${EXT_ATTRS}>${t("external_awards_abo_source")}${extSR()}</a>.</div></div>`;
@@ -3429,7 +3434,7 @@ async function externalAwardForNotice(r, el){
   el.innerHTML = `<div class="chain-h">${t("external_awards_heading")}</div><div class="chain">
     <div class="stage"><div class="box award">
       <div class="stage-name">${t("mode_award")}</div><div class="when">${fdate(c.approved||c.start)}</div>
-      <div class="bt" lang="en" dir="ltr">${escUiHtml(c.purpose)||t("untitled")}</div>
+      ${c.purpose?`<div class="bt" lang="en" dir="ltr">${escUiHtml(c.purpose)}</div>`:`<div class="bt">${t("untitled")}</div>`}
       ${money(c.amount)?`<div class="amt">${money(c.amount)}</div>`:""}
       ${c.vendor?`<div class="vend">${t("awarded_to")} <b lang="en" dir="ltr">${escUiHtml(c.vendor)}</b></div>`:""}
       ${c.method?`<div class="rmeta" lang="en" dir="ltr">${escUiHtml(c.method)}</div>`:""}

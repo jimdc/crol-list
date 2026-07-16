@@ -21,7 +21,8 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const indexSrc = readFileSync(join(ROOT, "index.html"), "utf8");
 
 function extractFn(name) {
-  const start = indexSrc.indexOf("async function " + name + "(");
+  const asyncStart = indexSrc.indexOf("async function " + name + "(");
+  const start = asyncStart >= 0 ? asyncStart : indexSrc.indexOf("function " + name + "(");
   assert.notEqual(start, -1, `function ${name} not found in index.html`);
   let depth = 0, seen = false;
   for (let j = indexSrc.indexOf("{", start); j < indexSrc.length; j++) {
@@ -194,4 +195,40 @@ test("checkbookNychaByPin: fails closed when the bounded page limit is exhausted
 test("NYCHA award rendering keeps translated chrome outside the English vendor island", () => {
   assert.match(indexSrc, /<div class="vend">\$\{t\("awarded_to"\)\} <b lang="en" dir="ltr">/);
   assert.doesNotMatch(indexSrc, /<div class="vend" lang="en" dir="ltr">\$\{t\("awarded_to"\)\}/);
+});
+
+test("authorityAwardsHTML: marks only populated source values as English", () => {
+  const authorityAwardsHTML = new Function(
+    "authorityAwardSource", "fdate", "escUiHtml", "t", "money", "EXT_ATTRS", "extSR",
+    extractFn("authorityAwardsHTML") + "\nreturn authorityAwardsHTML;",
+  )(authorityAwardSource, (value) => value, (value) => String(value), (key) => ({ untitled_name: "بلا اسم", external_awards_heading: "العقود", external_awards_abo_note: "ملاحظة", external_awards_abo_source: "المصدر" }[key]), (value) => value ? `$${value}` : "", "", () => "");
+
+  const fallback = authorityAwardsHTML("School Construction Authority", [{ date: "2026-01-01", amount: 0 }]);
+  assert.match(fallback, /<span class="tlreason"><b>بلا اسم<\/b><\/span>/);
+  assert.doesNotMatch(fallback, /lang="en"/);
+
+  const populated = authorityAwardsHTML("School Construction Authority", [{ vendor: "SOURCE VENDOR", description: "SOURCE DESCRIPTION", process: "SOURCE PROCESS", date: "2026-01-01", amount: 10 }]);
+  assert.match(populated, /<b lang="en" dir="ltr">SOURCE VENDOR<\/b>/);
+  assert.match(populated, /<span lang="en" dir="ltr"> — SOURCE DESCRIPTION<\/span>/);
+  assert.match(populated, /<span lang="en" dir="ltr">SOURCE PROCESS<\/span>/);
+});
+
+test("externalAwardForNotice: leaves translated purpose fallback in page language", async () => {
+  let rows = [{ purpose: "", amount: 0, vendor: "", method: "" }];
+  const externalAwardForNotice = new Function(
+    "checkbookNychaByPin", "usablePin", "document", "rankNychaAwardCandidates", "t", "fdate", "escUiHtml", "money",
+    extractFn("externalAwardForNotice") + "\nreturn externalAwardForNotice;",
+  )(async () => rows, () => true, { contains: () => true }, (_notice, candidates) => candidates,
+    (key) => ({ external_awards_heading: "العقود", mode_award: "منح", untitled: "بلا عنوان", awarded_to: "مُنح إلى", external_award_nycha_note_html: "ملاحظة" }[key]),
+    (value) => value || "", (value) => String(value || ""), (value) => value ? `$${value}` : "");
+  const notice = { agency_name: "Housing Authority", type_of_notice_description: "Solicitation", pin: "337474" };
+  const el = { innerHTML: "" };
+
+  await externalAwardForNotice(notice, el);
+  assert.match(el.innerHTML, /<div class="bt">بلا عنوان<\/div>/);
+  assert.doesNotMatch(el.innerHTML, /<div class="bt" lang="en" dir="ltr">بلا عنوان<\/div>/);
+
+  rows = [{ purpose: "SOURCE PURPOSE", amount: 0, vendor: "", method: "" }];
+  await externalAwardForNotice(notice, el);
+  assert.match(el.innerHTML, /<div class="bt" lang="en" dir="ltr">SOURCE PURPOSE<\/div>/);
 });
