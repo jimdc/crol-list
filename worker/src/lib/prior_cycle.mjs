@@ -73,10 +73,11 @@ export function rankPriorCycleCandidates(r, candidates, opts) {
 
 // Mirrors rankPriorCycleCandidates()'s pre-score filters (self, agency, own PIN, prior date,
 // >=180-day gap) — how many candidates were even eligible, before the 0.5 title-overlap bar.
-// The dual-implemented twin of index.html's priorCycleEligibleCount(); the Phase 1b endpoint
-// returns this count so the client can pick 67's no_candidates-vs-low_confidence empty-state
-// message without re-running the strict query it no longer fetches. Keep in sync BY HAND with
-// index.html's copy, same as the rank steps above.
+// Worker-only since the Phase 1b swap: the endpoint returns this count so the client can pick
+// 67's no_candidates-vs-low_confidence empty-state message without re-running the strict query
+// it no longer fetches (index.html's own copy was deleted in the swap). The rank functions above
+// stay dual-implemented and hand-synced with index.html; this eligibility count no longer has a
+// client twin to keep in sync.
 export function priorCycleEligibleCount(r, candidates) {
   return (candidates || [])
     .filter((c) => c.request_id !== r.request_id)

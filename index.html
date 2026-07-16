@@ -1320,13 +1320,14 @@ function priorCycleNoneHTML(r, eligibleCount, near){
 
 async function priorCycleAwards(r, el){
   if(!el || !r.agency_name || !cleanText(r.short_title)) return;
+  if(priorCycleTitleWords(r.short_title).length < 2){ el.innerHTML = priorCycleNoneHTML(r, 0, []); return; } // too generic to search — no worker round trip
   let data = null;
   try{
     const resp = await workerFetch("/priorcycle/" + encodeURIComponent(r.request_id), null, 8000);
     if(resp && resp.ok) data = await resp.json();
   }catch(e){}
   if(!document.contains(el)) return; // a newer selection replaced this panel
-  if(!data || !Array.isArray(data.strict) || !Array.isArray(data.near)) return; // network/degraded — say nothing rather than something wrong, same posture as followDollars
+  if(!data || data.ok === false || !Array.isArray(data.strict) || !Array.isArray(data.near)) return; // network/degraded — say nothing rather than something wrong, same posture as followDollars
   if(data.strict.length){ el.innerHTML = priorCycleHTML(data.strict); return; }
   el.innerHTML = priorCycleNoneHTML(r, data.eligibleCount, data.near);
   wireNearMatchReveal(el, data.near);

@@ -1174,18 +1174,25 @@ This file is the project's committed home for project-intrinsic agent knowledge:
   is an English data island wrapped `lang="en" dir="ltr"` per the RTL bidi-isolation convention —
   hence the two keys' `_html` suffix. Gate + case selection pinned in
   `test/near_match_prior_cycles.test.mjs`.
-- **Server-side precompute shipped (Phase 1a, 2026-07-16) — the client swap has NOT.**
+- **Server-side precompute shipped (Phase 1a, #68) and the client swap shipped (Phase 1b).**
   `worker/src/lib/prior_cycle.mjs` is a hand-synced dual implementation of the strict + near
   ranking functions above (same convention as `lib/lineage.mjs`), used by
   `worker/src/prior_cycle.mjs` to run the same two SODA queries server-side, cache the
-  `{strict, near}` result in the D1 `prior_cycle_matches` table (migration `0002`,
-  compute-on-miss; the daily cron pre-warms freshly-ingested Award notices via
+  `{strict, near, eligibleCount}` result in the D1 `prior_cycle_matches` table (migration
+  `0002`, compute-on-miss; the daily cron pre-warms freshly-ingested Award notices via
   `ingestNotices()`'s returned `awardRequestIds`), and serve `GET /priorcycle/<request_id>`
-  (public, edge-cached 5 min). index.html still fires its own live SODA calls until Phase 1b
-  swaps them for that endpoint — until then any change to the title-word/gap/score/
-  corroboration heuristics must land in BOTH copies;
-  `worker/test/prior_cycle_lib.test.mjs`'s cross-check extracts the client functions from
-  index.html and fails on divergence.
+  (public, edge-cached 5 min). index.html's `priorCycleAwards()` now reads that endpoint in one
+  `workerFetch()` — the strict rows, the pre-loaded near set (so the "look for looser matches"
+  reveal shows only when `near.length>0`, no lazy second query), and the server-computed
+  `eligibleCount` (which the client no longer recomputes, since it stops fetching the strict
+  rows). `priorCycleEligibleCount` is therefore WORKER-ONLY now — the client copy was deleted in
+  the swap. The endpoint also returns an `ok` flag: on a worker/SODA outage the client renders
+  nothing (the pre-swap say-nothing posture) instead of a confident "no earlier awards", and the
+  failure is not cached (`Cache-Control: no-store`). A `<2`-significant-word title still
+  short-circuits locally in `priorCycleAwards()` with no round trip. Any change to the
+  title-word/gap/score/corroboration heuristics must still land in BOTH copies of the ranking
+  functions; `worker/test/prior_cycle_lib.test.mjs`'s cross-check extracts the client functions
+  from index.html and fails on divergence.
 - **A near-match needs the loosened title score PLUS at least one of two corroborating
   signals** — how much of the (renewal-suffix-stripped) PIN's prefix the two notices share
   (`pinPrefixShared()`, floor `NEAR_MATCH_PIN_PREFIX_MIN_LEN`=8) or whether their contract

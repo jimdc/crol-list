@@ -146,11 +146,11 @@ async function cachePut(env, requestId, agency, matches) {
 // Fail-soft: never throws.
 export async function getOrCompute(env, requestId) {
   const cached = await cacheGet(env, requestId);
-  if (cached) return cached;
+  if (cached) return { ...cached, ok: true };
   const row = await fetchNoticeRow(env, requestId);
   const { strict, near, eligibleCount, ok } = await computeMatches(env, requestId, row);
   if (ok) await cachePut(env, requestId, row && row.agency_name, { strict, near, eligibleCount });
-  return { strict, near, eligibleCount };
+  return { strict, near, eligibleCount, ok };
 }
 
 // Bounded batch pre-warm, used by the daily cron for freshly-ingested Award notices. Skips
@@ -197,12 +197,17 @@ export async function handlePriorCycle(req, env, pathname) {
   if (!/^[A-Za-z0-9_-]{4,40}$/.test(rawId)) return json({ ok: false, reason: "bad-id" }, 400, cors);
 
   const matches = await getOrCompute(env, rawId);
+  const ok = matches.ok !== false;
   return new Response(JSON.stringify({
     id: rawId, strict: matches.strict, near: matches.near,
     eligibleCount: typeof matches.eligibleCount === "number" ? matches.eligibleCount : 0,
+    ok,
   }), {
     status: 200,
-    headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" },
+    headers: {
+      ...cors, "Content-Type": "application/json",
+      "Cache-Control": ok ? "public, max-age=300" : "no-store",
+    },
   });
 }
 
