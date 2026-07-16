@@ -1456,25 +1456,6 @@ This file is the project's committed home for project-intrinsic agent knowledge:
   topic, edit the builder's amount, confirm BOTH Preview buttons describe the identical
   result) — confirmed failing against the pre-fix code via `git stash` before confirming it
   passes, per house testing doctrine.
-## Cross-source authority awards — exact agency maps and NYCHA's reused PINs
-
-- `external_awards.js` is the pure, browser-global/Node-testable seam for external award
-  resolution. `AUTHORITY_AWARD_SOURCES` maps City Record agency names to the official NYS
-  Authorities Budget Office authority name + Socrata dataset (`8w5p-k45m` local authorities,
-  `d84c-dk28` local development corporations). `showAgency()` queries those CORS-open feeds
-  client-side and renders a distinct, source-labeled annual-filing panel; the rows never become
-  City Record rows and the UI states that the source may lag by a year.
-- NYCHA uses the existing `/checkbook` schema-agnostic proxy with
-  `<type_of_data>Contracts_NYCHA</type_of_data>`. **A NYCHA PIN is not globally unique over
-  time.** Live PIN `510394` returned a 2012 purchase order for a solicitation published in
-  2025, disproving the scout's original hard-ID assumption. `rankNychaAwardCandidates()` must
-  keep both guards: exact PIN and `approved_date`/`start_date >= notice.start_date`; never
-  simplify this to PIN-only. Agreement rows are retained and duplicate Line rows discarded.
-- The runtime i18n fixture stubs `data.ny.gov` and drives the SCA profile's
-  `#external-awards-content` subtree in all ten shipping languages. Keep that walk when adding
-  fields or sources; official row values stay English data islands (`lang="en" dir="ltr"`),
-  while headings and provenance remain translated chrome.
-
 ## Maintaining this file
 
 Keep this file for knowledge useful to almost every future agent session in this project.
