@@ -447,6 +447,29 @@ This file is the project's committed home for project-intrinsic agent knowledge:
   after one hop. If a second qualifying PR merges before the queue processes the first bot PR,
   the next run reads the bot branch's own pending `changelog-data.json` as its base (not
   `main`'s stale copy) and accumulates onto that same open PR instead of opening a duplicate.
+  **`changelog.html` itself is a different story — it must NEVER be read from the bot
+  branch.** Both this workflow's regeneration step and `ci.yml`'s pre-merge reading-level
+  simulation used to overwrite the freshly-checked-out `changelog.html` with the bot branch's
+  own carried-forward copy before rebuilding the entries block — so any change to the page
+  OUTSIDE the `CHANGELOG:AUTO` markers on `main` (a removed disclaimer, a CSS rule) silently
+  reverted the moment the bot branch regenerated, since `gen_changelog.mjs` only ever
+  rewrites the block between the markers, leaving everything else exactly as handed to it.
+  This produced a real, repeating CI failure: PR #83 removed the `chg_auto_note` disclaimer
+  from `main`, but the bot branch's stale copy still had it, and every subsequent
+  regeneration kept re-failing the i18n reference gate with a key that no longer exists.
+  Fixed by `tools/prepare-changelog-base.sh` (sourced by both workflows): it pulls
+  `changelog-data.json` from the bot branch when present, but never touches
+  `changelog.html` — that file always stays whatever the current checkout already has.
+  **Sharp edge this same incident also surfaced**: a human bypassing the bot to hand-edit
+  `changelog-data.json` directly on `main` (as PR #83 also did, to restore the curated bar —
+  see below) can leave the bot branch's own pending entries list stale/superseded with no
+  mechanical way to tell "genuinely still-pending" apart from "deliberately removed by that
+  edit." When this happened live, the correct repair was to drop the bot branch entirely
+  (nothing on it was still legitimately pending — `main`'s own curated list already reflected
+  every judgment call) and close its PR rather than force a merge; the pipeline opens a fresh,
+  correct PR the next time a real qualifying PR merges. If this recurs, check whether
+  `main`'s changelog-data.json diverges from the bot branch's pending copy for reasons other
+  than normal accumulation before trusting either as the base.
 - **The bot PR lands itself — no maintainer click required** (PR #83, fixing PR
   #81's real failure mode). Arming auto-merge alone doesn't help: main's ruleset requires
   four named status checks on top of the merge queue, and GitHub requires a maintainer to
