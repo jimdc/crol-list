@@ -7,3 +7,12 @@ internal/
 tasks/
 backlog/
 *.local.md
+
+# agent/estate scaffolding stays local, never public
+AGENTS.md
+CLAUDE.md
+backlog/
+PAPERCUTS.md
+.scrimignore
+.claude/
+.agents/
